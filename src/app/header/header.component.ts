@@ -11,6 +11,7 @@ import { ThemeService } from '../theme.service';
 export class HeaderComponent {
   isLoggedIn: boolean = false;
   userRoles: string[] = []; // Definir a propriedade userRoles
+  username: string | null | undefined;
 
 
   constructor(private authService: AuthService, private router: Router, private themeService: ThemeService) {}
@@ -19,6 +20,7 @@ export class HeaderComponent {
     this.authService.getUserRoles().subscribe(roles => {
       this.userRoles = roles;
       console.log('Roles atualizadas no header:', this.userRoles);
+      this.username = localStorage.getItem('username');
     });
     this.authService.getAuthStatus().subscribe(status => {
       this.isLoggedIn = status;

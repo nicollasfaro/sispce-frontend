@@ -20,9 +20,18 @@ export class DataService {
 
   getNCEs(): Observable<any[]> {
     const token = localStorage.getItem('authToken');
-    const headers = { Authorization: `Bearer ${token}` };
-    console.log('entrei')
-    return this.http.get<any[]>('/api/nces', { headers });
+  const headers = { Authorization: `Bearer ${token}` };
+
+  return this.http.get('/api/nces', { headers, responseType: 'text' }).pipe(
+    map(response => {
+      try {
+        return JSON.parse(response); // Faz parse manualmente
+      } catch (error) {
+        console.error("Erro ao converter JSON:", error);
+        return [];
+      }
+    })
+  );
   }
 
   getOms(): Observable<any> {
@@ -35,7 +44,7 @@ export class DataService {
     const token = localStorage.getItem('authToken');
     const headers = { Authorization: `Bearer ${token}` };
 
-    return this.http.get<any>('api/users', { headers });
+    return this.http.get<any>('/api/users', { headers });
   }
   deleteUser(userId: string): Observable<any> {
     return this.http.delete(`'/api/users'/${userId}`);
@@ -89,4 +98,11 @@ export class DataService {
   addCandidateToNce(candidatoData: any): Observable<any> {
     return this.http.post(`'/api/'/candidatosParaNce`, candidatoData);
   }
+
+  getAttachments(nceId: string): Observable<any[]> {
+    const token = localStorage.getItem('authToken');
+    const headers = { Authorization: `Bearer ${token}` };
+
+    return this.http.get<any[]>(`/api/nces/${nceId}/attachments`, { headers });
+}
 }

@@ -57,6 +57,7 @@ export class AuthService {
 
           if (currentUser) {
             console.log('Usuário logado encontrado:', currentUser);
+            localStorage.setItem('username', currentUser.username);
 
             // Verifica e armazena roles do usuário logado
             if (currentUser.roles && currentUser.roles.length > 0) {
@@ -68,7 +69,8 @@ export class AuthService {
               this.rolesSubject.next(roles);
               const organizacaoMilitarUsuario = currentUser.organizacaoMilitar.nomeInstituicao;
               sessionStorage.setItem('organizacaoMilitarUsuario', JSON.stringify(organizacaoMilitarUsuario));
-              if ((this.roles = ['ROLE_APROVADOR'])) {
+              console.log('Organização Militar do usuário logado:', organizacaoMilitarUsuario);
+              if (roles.includes('ROLE_APROVADOR')) {
                 console.log(this.roles);
                 this.router.navigate(['/listaNce']);
               } else {
@@ -92,37 +94,6 @@ export class AuthService {
   getUserRoles(): Observable<string[]> {
     return this.rolesSubject.asObservable(); // Retorna um Observable para as roles
   }
-
-  // async getUser() {
-  //   const token = localStorage.getItem('authToken');
-  //   const headers = {Authorization: `Bearer ${token}`};
-
-  //   console.log('Fazendo requisição para o endpoint de usuários com o token:', token);
-
-  //   const response = await this.http.get<any>('/api/users', { headers }).toPromise();
-  //   this.roles = response
-  //   console.log('Resposta recebida do servidor:', this.roles[0].roles[0].name);
-
-  //   // return this.http.get<any>('/api/users', { headers }).pipe(tap(response => {
-  //   //       // Log de sucesso
-  //   //       console.log('Resposta recebida do servidor:', response);
-
-  //   //       // Verificar e armazenar roles, se estiverem presentes na resposta
-  //         if (this.roles && this.roles.length > 0) {
-  //           const roles = this.roles.map(role => role[0].roles[0].name); // Extraindo o nome das roles
-  //           console.log('Roles do usuário:', roles);
-  //           localStorage.setItem('userRoles', JSON.stringify(roles)); // Armazenando roles
-  //         } else {
-  //           console.log('Nenhuma role encontrada na resposta');
-  //         }
-  //   //     }),
-  //   //     catchError(error => {
-  //   //       // Log de erro mais detalhado
-  //   //       console.error('Erro ao buscar usuário. Detalhes do erro:', error);
-  //   //       return this.handleError<any>('getUser', {})(error);  // Log e tratamento do erro
-  //   //     })
-  //   //   );
-  // }
 
   setSession(token: string): void {
     // Armazena o token JWT no localStorage

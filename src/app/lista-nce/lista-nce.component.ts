@@ -5,7 +5,7 @@ import { AdcionarCandidatoModalComponent } from '../adcionar-candidato-modal/adc
 import { MatTableDataSource } from '@angular/material/table';
 import { DataService } from '../data.service';
 import { Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import * as bootstrap from 'bootstrap';
 import { FileUploadService } from '../fileUpload.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -46,9 +46,9 @@ export class ListaNceComponent {
     private router: Router) {}
 
   ngOnInit(): void {
-    console.log(this.userRoles)
     this.loadNCES();
     this.loadPostos();
+    this.getRoles();
 
     this.dataService.getCandidates().subscribe((candidatos) => {
       this.candidatos = candidatos;
@@ -64,22 +64,29 @@ export class ListaNceComponent {
         console.error('Candidatos is not an array');
       }
     });
+  
+    this.carregaStatus();
+  }
+
+  getRoles(){
     this.authService.getUserRoles().subscribe(roles => {
-      this.userRoles = roles;
+      this.userRoles = roles; 
       console.log('Roles atualizadas no header:', this.userRoles);
     }); // Verifique se o método está correto
-    this.carregaStatus();
   }
 
   loadNCES(){
     const organizacaoMilitarUsuario = JSON.parse(sessionStorage.getItem('organizacaoMilitarUsuario') || '{}');
-
+    console.log(organizacaoMilitarUsuario);
     this.dataService.getNCEs().subscribe((cursos) => {
-      this.courses = cursos.filter(nce => 
+      this.courses = cursos
+      .filter(nce => 
         nce.organizacaoMilitar.nomeInstituicao === organizacaoMilitarUsuario
       );
+      console.log('Cursos:', this.courses);
     });
   }
+
 
   carregaStatus(){
     this.dataService.getStatusNCE().subscribe((data) => {
@@ -275,34 +282,35 @@ export class ListaNceComponent {
     if (!nceId || this.selectedFiles.length === 0) {
       return;
     }
-
-    // Simular URLs de arquivos anexados
-    const uploadedFiles = this.selectedFiles.map((file) => ({
-      fileName: file.name,
-      url: `uploads/${file.name}` // Apenas simulando a URL
-    }));
-
-    // Determinar o status baseado no nome do arquivo
-    const status = this.determineStatus(this.selectedFiles[0].name);
-
-    // Atualizar a NCE no db.json com os arquivos anexados e o novo status
-    this.http.get(`http://localhost:3000/nce/${nceId}`).subscribe((nce: any) => {
-      if (!nce.attachments) {
-        nce.attachments = [];
-      }
-      nce.attachments.push(...uploadedFiles);
-      
-      // Atualiza o status da NCE
-      nce.status = status;
-
-      this.http.put(`http://localhost:3000/nce/${nceId}`, nce).subscribe(() => {
-        console.log('NCE atualizada com sucesso!');
-        $('#uploadModal').modal('hide');  // Fecha o modal após o envio
-        this.clearFiles();
-        this.loadCourses();  // Atualiza a lista de cursos após a edição
-      });
+  
+    const formData = new FormData();
+    this.selectedFiles.forEach((file) => {
+      formData.append("file", file);
     });
-  }
+  
+    const token = localStorage.getItem('authToken');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+  
+    this.http.post(`http://localhost:8080/nces/${nceId}/upload`, formData, { headers }).subscribe(
+      () => {
+        console.log("Arquivo enviado com sucesso!");
+
+      // ⚠️ Aguarda 1 segundo e recarrega a lista de NCEs para evitar bugs
+      setTimeout(() => {
+        this.dataService.getNCEs().subscribe(data => {
+          this.courses = data;
+        }, error => {
+          console.error("Erro ao recarregar NCEs:", error);
+        });
+      }, 1000);
+    },
+    (error) => {
+      console.error("Erro ao enviar arquivo:", error);
+    }
+  );
+}
 
   // Limpar os arquivos anexados ao fechar o modal
   clearFiles() {

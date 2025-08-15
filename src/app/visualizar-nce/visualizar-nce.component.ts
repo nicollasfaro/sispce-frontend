@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NceService } from '../nce.service';
 import { DataService } from '../data.service';
 import { AuthService } from '../auth.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-visualizar-nce',
@@ -15,12 +16,16 @@ export class VisualizarNceComponent {
   candidatoDetails: any [] = []; // Você pode definir o tipo correto de acordo com seus dados
   candidatoId!: number;
   userRoles: string[] =[];
+  attachments: any[] = [];
 
-  constructor(private route: ActivatedRoute, private nceService: NceService, private router: Router, private dataService: DataService, private authService: AuthService) {}
+  constructor(private route: ActivatedRoute, private nceService: NceService, private router: Router, private dataService: DataService, private authService: AuthService, private http: HttpClient) {}
 
   ngOnInit(): void {
+    
     this.nceId = this.route.snapshot.paramMap.get('id') || '';
     this.loadNceDetails(this.nceId);
+    this.loadAttachments(this.nceId);
+    console.log(this.nceId)
     this.loadCandidatoParaNce();
     this.authService.getUserRoles().subscribe(roles => {
       this.userRoles = roles;
@@ -28,11 +33,52 @@ export class VisualizarNceComponent {
     }); // Verifique se o método está correto
   }
 
+  loadAttachments(nceId: string) {
+    this.dataService.getAttachments(this.nceId).subscribe(
+        (attachments) => {
+            console.log("Anexos carregados:", attachments);
+            this.attachments = attachments;
+        },
+        (error) => {
+            console.error("Erro ao buscar anexos:", error);
+        }
+    );
+}
+
+downloadFile(fileName: string) {
+  const decodedFileName = decodeURIComponent(fileName); // 🔹 Decodifica antes de enviar a requisição
+  const token = localStorage.getItem('authToken');
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`
+  });
+
+  this.http.get(`/api/nces/attachments/download/${decodedFileName}`, {
+    headers,
+    responseType: 'blob' // 🔹 Indica que a resposta é um arquivo binário
+  }).subscribe(blob => {
+    if (blob.size < 150) { // 🔹 Se for muito pequeno, pode ser um erro
+      console.error("❌ Erro: Servidor retornou uma resposta inválida.");
+      return;
+    }
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = decodedFileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }, error => {
+    console.error("❌ Erro ao baixar o arquivo:", error);
+  });
+}
+
   loadNceDetails(nceId: string) {
     
     this.nceService.getNceById(nceId).subscribe(
       (data) => {
         this.nceDetails = data;
+        this.nceId = data.nceId;
         console.log(data)
       },
       (error) => {

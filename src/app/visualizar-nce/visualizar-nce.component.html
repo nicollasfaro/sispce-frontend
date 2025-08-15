@@ -83,9 +83,16 @@
           </div>
           <div class="col-md-6">
             <h5><i class="fas fa-user"></i> Responsável</h5>
-            <p>{{ nceDetails.postoResponsavel }} {{ nceDetails.responsavel }}</p>
-            <p>{{ nceDetails.funcao }} {{ nceDetails.organizacaoMilitarResponsavel.nomeInstituicao }}</p>
-            <p>Contato: {{ nceDetails.cellphone }} RITEX: {{ nceDetails.ritex }}</p>
+            <p>
+              {{ nceDetails.postoResponsavel }} {{ nceDetails.responsavel }}
+            </p>
+            <p>
+              {{ nceDetails.funcao }}
+              {{ nceDetails.organizacaoMilitarResponsavel.nomeInstituicao }}
+            </p>
+            <p>
+              Contato: {{ nceDetails.cellphone }} RITEX: {{ nceDetails.ritex }}
+            </p>
             <p>{{ nceDetails.mail }}</p>
           </div>
         </div>
@@ -133,9 +140,23 @@
         </div>
 
         <!-- Se não houver anexos -->
-        <div *ngIf="!nceDetails.attachments || !nceDetails.attachments.length">
-          <p class="text-muted">Nenhum anexo disponível.</p>
+        <div *ngIf="attachments.length > 0" class="attachments-container">
+          <h3 class="attachments-title">Anexos Disponíveis</h3>
+          <div class="attachments-grid">
+            <div *ngFor="let attachment of attachments" class="attachment-card">
+              <div class="file-icon">
+                <img src="assets/icons/pdf-icon.png" *ngIf="attachment.fileType === 'application/pdf'" alt="PDF">
+                <img src="assets/icons/image-icon.png" *ngIf="attachment.fileType.startsWith('image/')" alt="Imagem">
+                <img src="assets/icons/file-icon.png" *ngIf="!attachment.fileType.startsWith('image/') && attachment.fileType !== 'application/pdf'" alt="Arquivo">
+              </div>
+              <p class="file-name">{{ attachment.fileName }}</p>
+              <button (click)="downloadFile(attachment.fileName)" class="download-btn">
+                ⬇ Baixar
+              </button>
+            </div>
+          </div>
         </div>
+        <p *ngIf="attachments?.length === 0">Nenhum anexo disponível.</p>
       </div>
       <!-- Template de carregamento -->
       <ng-template #loading>
