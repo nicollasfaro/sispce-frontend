@@ -22,16 +22,9 @@ export class LoginComponent {
   }
 
   onLogin() {
-    this.authService.login(this.username, this.password).subscribe(
-      (response) => {
-        console.log('Login bem-sucedido!', response);
-        // Redirecionar após login bem-sucedido
-        this.authService.getUser(this.username);
-      },
-      (error) => {
-        console.error('Erro no login', error);
-        // Exibir mensagem de erro ou tratar falhas
-      }
-    );
-  }
+  this.authService.login(this.username, this.password).subscribe({
+    next: () => this.authService.getUser(this.username), // ele mesmo navega
+    error: err => this.errorMessage = 'Usuário ou senha inválidos'
+  });
+}
 }

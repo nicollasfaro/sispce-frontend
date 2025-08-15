@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 
 }) export class NceService { 
-    private baseUrl = 'http://10.1.99.13:8080/nces'; // URL da API para buscar NCEs
+    private baseUrl = 'http://localhost:8080/nces'; // URL da API para buscar NCEs
 
     constructor(private http: HttpClient, private authService: AuthService) {}
     
@@ -21,8 +21,14 @@ import { AuthService } from './auth.service';
 
     // Atualizar uma NCE
   updateNce(nce: any): Observable<any> {
-    return this.http.put(`${this.baseUrl}/${nce.id}`, nce);
-  }
+  const payload = {
+    titulo: nce.titulo,
+    descricao: nce.descricao,
+    status: nce.status
+    // demais campos editáveis do NceRequest
+  };
+  return this.http.put(`${this.baseUrl}/${nce.id}`, payload);
+}
 
   // Busca o usuário logado
   getUser(): Observable<any> {

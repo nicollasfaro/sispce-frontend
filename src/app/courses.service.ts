@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class CoursesService {
-  private apiUrl = 'http://10.1.99.13:8080/nces';  // URL do endpoint de cursos
+  private apiUrl = 'http://localhost:8080/nces';  // URL do endpoint de cursos
 
   constructor(private http: HttpClient) {}
 

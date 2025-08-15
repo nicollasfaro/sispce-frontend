@@ -1,45 +1,77 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand">
-      <img src="/logo.png" alt="SisPCE" height="40">
-    </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item" *ngIf="isLoggedIn && (userRoles.includes('ROLE_ADMIN') || userRoles.includes('ROLE_BASIC'))">
-          <a class="nav-link" routerLink="/courses">Adcionar NCE</a>
-          
-        </li>
-        <li class="nav-item" *ngIf="isLoggedIn">
-          <a class="nav-link" routerLink="/listaNce">Lista de NCE's</a>
-        </li>
-        <li class="nav-item" *ngIf="isLoggedIn && userRoles.includes('ROLE_ADMIN')" >
-          <a class="nav-link" routerLink="/cadastroCandidato">Cadastro de Candidato</a>
-        </li>
-        <li class="nav-item" *ngIf="isLoggedIn">
-          <a class="nav-link" routerLink="/cadastroUsuario">Usuários</a>
-        </li>
-        <li class="nav-item" *ngIf="isLoggedIn" style="position: absolute;
-        right: 0;
-        margin-right: 10px;">
-          <button class="btn btn-outline-danger" (click)="logout()">Sair</button>
-        </li>
-        <li class="nav-item" style="position: absolute;
-        right: 0;
-        margin-right: 80px;">
-          <div class="theme-toggle">
-            <input type="checkbox" id="theme-switch" (click)="toggleTheme()" />
-            <label for="theme-switch" class="theme-switch-label">
-              <div class="sun-moon">
-                <div class="sun"></div>
-                <div class="moon"></div>
-              </div>
-              <div class="toggle-circle"></div>
-            </label>
-          </div>
-        </li>
-      </ul>
-    </div>
-  </nav>
-  
+  <a class="navbar-brand" routerLink="/courses">
+    <img src="/logo.png" alt="SisPCE" height="40" />
+  </a>
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-toggle="collapse"
+    data-target="#navbarNav"
+    aria-controls="navbarNav"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ml-auto">
+      <li
+        class="nav-item"
+        *ngIf="
+          isLoggedIn &&
+          (userRoles.includes('ROLE_ADMIN') || userRoles.includes('ROLE_BASIC'))
+        "
+      >
+        <a class="nav-link" routerLink="/courses">Adcionar NCE</a>
+      </li>
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a class="nav-link" routerLink="/listaNce">Lista de NCE's</a>
+      </li>
+      <li
+        class="nav-item"
+        *ngIf="isLoggedIn && userRoles.includes('ROLE_ADMIN')"
+      >
+        <a class="nav-link" routerLink="/cadastroCandidato"
+          >Cadastro de Candidato</a
+        >
+      </li>
+      <li
+        class="nav-item"
+        *ngIf="isLoggedIn && userRoles.includes('ROLE_ADMIN')"
+      >
+        <a class="nav-link" routerLink="/cadastroUsuario">Usuários</a>
+      </li>
+      <li
+        class="nav-item"
+        *ngIf="isLoggedIn"
+        style="position: absolute; right: 150px; margin-right: 10px"
+      >
+        <span class="navbar-text">
+          {{ username }}
+        </span>
+      </li>
+      <li
+        class="nav-item"
+        *ngIf="isLoggedIn"
+        style="position: absolute; right: 0; margin-right: 10px"
+      >
+        <button class="btn btn-outline-danger" (click)="logout()">Sair</button>
+      </li>
+      <li
+        class="nav-item"
+        style="position: absolute; right: 0; margin-right: 80px"
+      >
+        <div class="theme-toggle">
+          <input type="checkbox" id="theme-switch" (click)="toggleTheme()" />
+          <label for="theme-switch" class="theme-switch-label">
+            <div class="sun-moon">
+              <div class="sun"></div>
+              <div class="moon"></div>
+            </div>
+            <div class="toggle-circle"></div>
+          </label>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
