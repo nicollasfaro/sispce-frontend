@@ -47,7 +47,7 @@ export class CadastroCandidatoComponent {
       dtUltPromo: ['', Validators.required],
       dtIncOM: ['', Validators.required],
       dtAprOM: ['', Validators.required],
-      tmpGuar: ['', Validators.required],
+      tmpGuar: [Number, Validators.required],
       funDes: ['', Validators.required],
       naoMatriculado: [Boolean, Validators.required],
       judice: [Boolean, Validators.required],
@@ -140,7 +140,7 @@ export class CadastroCandidatoComponent {
   onSave(): void {
     if(this.candidateForm.valid){
       this.isLoading = true;
-    this.dataService.addCandidato(this.candidateForm.value, this.newCourse).subscribe(candidato => {
+    this.dataService.addCandidate(this.candidateForm.value).subscribe(candidato => {
       this.candidatos.push(candidato);
       this.isLoading = false;
       this.candidateForm.reset(); // Limpa os campos do formulário
@@ -171,4 +171,22 @@ export class CadastroCandidatoComponent {
     }
     
   }
+
+  formatarNomeCompleto() {
+  // Divide o valor em palavras
+  const words = this.candidateForm.get('fullName')?.value.split(' ');
+
+  // Formata cada palavra
+  const formattedWords = words.map((word: string) => {
+    // Mantém a palavra como está se tiver 2 caracteres
+    if (word.length === 2) {
+      return word.toLowerCase();
+    }
+    // Caso contrário, coloca a primeira letra maiúscula e o resto minúsculo
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  });
+
+  // Junta as palavras de volta e atualiza o campo
+  this.candidateForm.get('fullName')?.setValue(formattedWords.join(' '));
+}
 }

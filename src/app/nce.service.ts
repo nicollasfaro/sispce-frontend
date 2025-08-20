@@ -40,14 +40,7 @@ import { AuthService } from './auth.service';
 
   // Busca as NCEs e filtra pela Organização Militar do usuário logado
   getNcesByOrganizacaoMilitar(): Observable<any[]> {
-    return this.getUser().pipe(
-      map(user => user.organizacaoMilitar),  // Obtém a organização militar do usuário
-      switchMap(organizacaoMilitar => {
-        return this.http.get<any[]>(this.baseUrl).pipe(
-          map(nces => nces.filter(nce => nce.organizacaoMilitarResponsavel.nomeInstituicao === organizacaoMilitar)) // Filtra as NCEs
-        );
-      })
-    );
-  }
+  return this.http.get<any[]>(this.baseUrl);
+}
 
 }

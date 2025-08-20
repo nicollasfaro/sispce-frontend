@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CoursesService } from '../courses.service';
 import { MatDialog } from '@angular/material/dialog';
-import { AdcionarCandidatoModalComponent } from '../adcionar-candidato-modal/adcionar-candidato-modal.component';
+import { AdicionarCandidatoModalComponent } from '../adcionar-candidato-modal/adcionar-candidato-modal.component';
 import { MatTableDataSource } from '@angular/material/table';
 import { DataService } from '../data.service';
 import { Observable } from 'rxjs';
@@ -12,83 +12,108 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { AuthService } from '../auth.service';
-declare var $: any;
 
+declare var $: any;
 
 @Component({
   selector: 'app-lista-nce',
   templateUrl: './lista-nce.component.html',
-  styleUrl: './lista-nce.component.css'
+  styleUrl: './lista-nce.component.css',
 })
 export class ListaNceComponent {
   displayedColumns: string[] = ['position', 'name', 'weight', 'ações'];
   courses: any[] = [];
   candidatos: any[] = [];
   editingCourse: any = null;
-  dataSource = new MatTableDataSource(this.courses)
+  dataSource = new MatTableDataSource(this.courses);
   expandedCourseId: number | null = null;
   selectedFile: File | null = null;
   selectedFiles: File[] = [];
   nceId: number | null = null;
   private uploadUrl = 'http://localhost:3000/api/upload';
-  userRoles: string[] =[];
-  status: any[] =[];
+  userRoles: string[] = [];
+  status: any[] = [];
   postos: any[] = [];
 
+  // labels para exibir no lugar dos enums
+  statusLabels: Record<string, string> = {
+    CRIADA: 'Criada',
+    EM_ANALISE_CMT: 'Em análise (CMT)',
+    DEFERIDO_CMT: 'Deferido pelo Cmt',
+    INDEFERIDO_CMT: 'Indeferido pelo Cmt',
+    EM_ANALISE_CADESM: 'Em análise (CADESM)',
+    DEFERIDO_CADESM: 'Deferido (CADESM)',
+    INDEFERIDO_CADESM: 'Indeferido (CADESM)',
+    EM_ANALISE_DIRETORIA: 'Em análise (Diretoria)',
+    DEFERIDO_DIRETORIA: 'Deferido (Diretoria)',
+    INDEFERIDO_DIRETORIA: 'Indeferido (Diretoria)',
+    EM_ANALISE_EME: 'Em análise (EME)',
+    APROVADO_EME: 'Aprovado (EME)',
+    REPROVADO_EME: 'Reprovado (EME)',
+    LIBERADO_CANDIDATO: 'Liberado para candidato',
+    DELETADO: 'Deletado',
+  };
 
-  constructor(private coursesService: CoursesService, 
-    public dialog: MatDialog, 
-    private dataService: DataService, 
-    private http: HttpClient, 
+  constructor(
+    private coursesService: CoursesService,
+    public dialog: MatDialog,
+    private dataService: DataService,
+    private http: HttpClient,
     private fileUpload: FileUploadService,
     private snackBar: MatSnackBar,
     private authService: AuthService,
-    private router: Router) {}
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadNCES();
     this.loadPostos();
     this.getRoles();
 
+    this.status = this.courses.map((c) => ({
+      ...c,
+      statusLabel: this.statusLabels[c.statusNce] || c.statusNce,
+    }));
+
     this.dataService.getCandidates().subscribe((candidatos) => {
       this.candidatos = candidatos;
       console.log('Candidatos:', this.candidatos);
-      
+
       // Verificar se candidatos é um array antes de iterar
       if (Array.isArray(this.candidatos)) {
-        this.candidatos.forEach(candidato => {
-          candidato.curso = this.courses.find(curso => curso.id === candidato.cursoId);
-          console.log(candidato.curso = this.courses.find(curso => curso.id === candidato.cursoId))
+        this.candidatos.forEach((candidato) => {
+          candidato.curso = this.courses.find(
+            (curso) => curso.id === candidato.cursoId
+          );
+          console.log(
+            (candidato.curso = this.courses.find(
+              (curso) => curso.id === candidato.cursoId
+            ))
+          );
         });
       } else {
         console.error('Candidatos is not an array');
       }
     });
-  
+
     this.carregaStatus();
   }
 
-  getRoles(){
-    this.authService.getUserRoles().subscribe(roles => {
-      this.userRoles = roles; 
+  getRoles() {
+    this.authService.getUserRoles().subscribe((roles) => {
+      this.userRoles = roles;
       console.log('Roles atualizadas no header:', this.userRoles);
     }); // Verifique se o método está correto
   }
 
-  loadNCES(){
-    const organizacaoMilitarUsuario = JSON.parse(sessionStorage.getItem('organizacaoMilitarUsuario') || '{}');
-    console.log(organizacaoMilitarUsuario);
+  loadNCES() {
     this.dataService.getNCEs().subscribe((cursos) => {
-      this.courses = cursos
-      .filter(nce => 
-        nce.organizacaoMilitar.nomeInstituicao === organizacaoMilitarUsuario
-      );
+      this.courses = cursos;
       console.log('Cursos:', this.courses);
     });
   }
 
-
-  carregaStatus(){
+  carregaStatus() {
     this.dataService.getStatusNCE().subscribe((data) => {
       this.status = data;
       console.log('status:', this.status);
@@ -98,8 +123,17 @@ export class ListaNceComponent {
   // Método chamado ao soltar o item após arrastar
   drop(event: CdkDragDrop<any[]>) {
     moveItemInArray(this.courses, event.previousIndex, event.currentIndex);
-    // this.editingCourse = { ...this.courses };
-    // this.updateCourse();
+
+    // Monta array apenas com os IDs na ordem
+    const idsOrdenados = this.courses.map((c) => c.nceId);
+
+    this.coursesService.updatePrioridades(idsOrdenados).subscribe(() => {
+      this.snackBar.open('Ordem de prioridade salva!', 'Fechar', {
+        duration: 3000,
+        verticalPosition: 'bottom',
+        horizontalPosition: 'center',
+      });
+    });
   }
 
   // Função para salvar a nova ordem no servidor (json-server)
@@ -126,24 +160,26 @@ export class ListaNceComponent {
   toggleExpand(cursoId: number, event: Event): void {
     // Evitar que o clique no botão propague o evento de clique na linha
     event.stopPropagation();
-    
+
     // Alterna a expansão do curso selecionado
     this.expandedCourseId = this.expandedCourseId === cursoId ? null : cursoId;
   }
-  
 
   editCourse(course: any): void {
     this.editingCourse = { ...course };
-    console.log(course)
+    console.log(course);
   }
 
-  aprovarNce(course: any){
-    if(this.userRoles.includes('ROLE_APROVADOR') && (course.statusNce == "CRIADA" || course.statusNce == "EM_ANALISE_CMT")){
-      course.pendente = "CADESM"
-      course.statusNce = "DEFERIDO_CMT"
-      this.coursesService.updateCourse(course).subscribe(updatedCourse => {
-        console.log(updatedCourse)
-        console.log(course.pendente)
+  aprovarNce(course: any) {
+    if (
+      this.userRoles.includes('ROLE_APROVADOR') &&
+      (course.statusNce == 'CRIADA' || course.statusNce == 'EM_ANALISE_CMT')
+    ) {
+      course.pendente = 'CADESM';
+      course.statusNce = 'DEFERIDO_CMT';
+      this.coursesService.updateCourse(course).subscribe((updatedCourse) => {
+        console.log(updatedCourse);
+        console.log(course.pendente);
         // const index = this.courses.findIndex(course => course.nceId === updatedCourse.nceId);
         // if (index !== -1) {
         //   this.courses[index] = updatedCourse;
@@ -152,50 +188,81 @@ export class ListaNceComponent {
         // this.editingCourse = null;
       });
     } else {
-      window.alert('Perfil sem autorização de aprovador ou NCE aguardando entrar em análise!')
+      window.alert(
+        'Perfil sem autorização de aprovador ou NCE aguardando entrar em análise!'
+      );
     }
   }
 
-  updateCourse(): void {
-    if (this.editingCourse.nceId) {
-      console.log(this.editingCourse.nceId)
-      this.coursesService.updateCourse(this.editingCourse).subscribe(updatedCourse => {
-        console.log(updatedCourse)
-        console.log(this.courses)
+  reprovarNce(course: any) {
+    if (
+      this.userRoles.includes('ROLE_APROVADOR') &&
+      (course.statusNce == 'CRIADA' || course.statusNce == 'EM_ANALISE_CMT')
+    ) {
+      course.pendente = 'CADESM';
+      course.statusNce = 'INDEFERIDO_CMT';
+      this.coursesService.updateCourse(course).subscribe((updatedCourse) => {
+        console.log(updatedCourse);
+        console.log(course.pendente);
         // const index = this.courses.findIndex(course => course.nceId === updatedCourse.nceId);
         // if (index !== -1) {
         //   this.courses[index] = updatedCourse;
         // }
         this.loadNCES();
-        this.editingCourse = null;
+        // this.editingCourse = null;
       });
+    } else {
+      window.alert(
+        'Perfil sem autorização de aprovador ou NCE aguardando entrar em análise!'
+      );
     }
-    window.alert('NCE atualizada com sucesso!')
+  }
+
+  updateCourse(): void {
+    if (this.editingCourse.nceId) {
+      console.log(this.editingCourse.nceId);
+      this.coursesService
+        .updateCourse(this.editingCourse)
+        .subscribe((updatedCourse) => {
+          console.log(updatedCourse);
+          console.log(this.courses);
+          // const index = this.courses.findIndex(course => course.nceId === updatedCourse.nceId);
+          // if (index !== -1) {
+          //   this.courses[index] = updatedCourse;
+          // }
+          this.loadNCES();
+          this.editingCourse = null;
+        });
+    }
+    window.alert('NCE atualizada com sucesso!');
   }
 
   confirmDelete(id: number): void {
-    const confirmation = window.confirm('Você tem certeza que deseja deletar esta NCE?');
+    const confirmation = window.confirm(
+      'Você tem certeza que deseja deletar esta NCE?'
+    );
     if (confirmation) {
       this.deleteCourse(id);
     }
   }
-  
+
   deleteCourse(id: number): void {
     this.coursesService.deleteCourse(id).subscribe(() => {
-      this.courses = this.courses.filter(course => course.id !== id);
+      this.courses = this.courses.filter((course) => course.id !== id);
       this.loadNCES();
     });
   }
 
-  openAddCandidateModal(course: string): void {
-    const dialogRef = this.dialog.open(AdcionarCandidatoModalComponent, {
-      width: '500px', height: '250px',
-      data: course
+  openAddCandidateModal(nceId: number): void {
+    const dialogRef = this.dialog.open(AdicionarCandidatoModalComponent, {
+      width: '600px', // define um tamanho fixo (senão pode ficar invisível)
+      data: { nceId }, // passa dados para o modal
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       console.log('O modal foi fechado');
     });
+    console.log(nceId);
   }
 
   applyFilter(event: Event) {
@@ -203,26 +270,24 @@ export class ListaNceComponent {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
-
-   // Método para abrir o modal
-   openUploadModal(id: number) {
-    this.nceId = id
+  // Método para abrir o modal
+  openUploadModal(id: number) {
+    this.nceId = id;
     const modalElement = document.getElementById('uploadModal');
-  if (modalElement) {
-    const modal = new bootstrap.Modal(modalElement);
-    modal.show();
-  }
+    if (modalElement) {
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+    }
   }
 
   // Método chamado quando o arquivo é selecionado
   onFileSelected(event: any) {
-
     const files: FileList = event.target.files;
     for (let i = 0; i < files.length; i++) {
       this.selectedFiles.push(files[i]);
     }
     // const files: FileList = event.target.files;
-    
+
     // // Adiciona cada arquivo selecionado ao array
     // for (let i = 0; i < files.length; i++) {
     //   this.selectedFiles.push(files[i]);
@@ -232,7 +297,6 @@ export class ListaNceComponent {
     // event.target.value = '';
   }
 
-
   // Método para fazer o upload do arquivo
   uploadDocument() {
     if (this.selectedFile) {
@@ -240,12 +304,15 @@ export class ListaNceComponent {
       formData.append('file', this.selectedFile, this.selectedFile.name);
 
       // Substitua 'http://localhost:8080/upload' pelo endpoint correto do seu backend
-      this.http.post('http://localhost:8080/upload', formData).subscribe(response => {
-        console.log('Upload realizado com sucesso', response);
-        this.selectedFile = null;
-      }, error => {
-        console.error('Erro ao fazer upload', error);
-      });
+      this.http.post('http://localhost:8080/upload', formData).subscribe(
+        (response) => {
+          console.log('Upload realizado com sucesso', response);
+          this.selectedFile = null;
+        },
+        (error) => {
+          console.error('Erro ao fazer upload', error);
+        }
+      );
     } else {
       alert('Selecione um arquivo antes de enviar.');
     }
@@ -261,7 +328,7 @@ export class ListaNceComponent {
 
   // Remove o arquivo individualmente e atualiza a interface
   removeAttachment(index: number) {
-    this.selectedFiles.splice(index, 1);  // Remove o arquivo da lista
+    this.selectedFiles.splice(index, 1); // Remove o arquivo da lista
   }
 
   // Função para definir o status da NCE com base no nome do arquivo
@@ -282,35 +349,40 @@ export class ListaNceComponent {
     if (!nceId || this.selectedFiles.length === 0) {
       return;
     }
-  
+
     const formData = new FormData();
     this.selectedFiles.forEach((file) => {
-      formData.append("file", file);
+      formData.append('file', file);
     });
-  
+
     const token = localStorage.getItem('authToken');
     const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     });
-  
-    this.http.post(`http://localhost:8080/nces/${nceId}/upload`, formData, { headers }).subscribe(
-      () => {
-        console.log("Arquivo enviado com sucesso!");
 
-      // ⚠️ Aguarda 1 segundo e recarrega a lista de NCEs para evitar bugs
-      setTimeout(() => {
-        this.dataService.getNCEs().subscribe(data => {
-          this.courses = data;
-        }, error => {
-          console.error("Erro ao recarregar NCEs:", error);
-        });
-      }, 1000);
-    },
-    (error) => {
-      console.error("Erro ao enviar arquivo:", error);
-    }
-  );
-}
+    this.http
+      .post(`http://localhost:8080/nces/${nceId}/upload`, formData, { headers })
+      .subscribe(
+        () => {
+          console.log('Arquivo enviado com sucesso!');
+
+          // ⚠️ Aguarda 1 segundo e recarrega a lista de NCEs para evitar bugs
+          setTimeout(() => {
+            this.dataService.getNCEs().subscribe(
+              (data) => {
+                this.courses = data;
+              },
+              (error) => {
+                console.error('Erro ao recarregar NCEs:', error);
+              }
+            );
+          }, 1000);
+        },
+        (error) => {
+          console.error('Erro ao enviar arquivo:', error);
+        }
+      );
+  }
 
   // Limpar os arquivos anexados ao fechar o modal
   clearFiles() {
@@ -319,15 +391,15 @@ export class ListaNceComponent {
   }
 
   viewNce(nceId: string) {
-    console.log(nceId)
+    console.log(nceId);
     this.router.navigate(['/nce', nceId]);
   }
 
-  loadPostos(){
+  loadPostos() {
     this.dataService.getPostos().subscribe(
       (data) => {
         this.postos = data;
-        console.log(this.postos)
+        console.log(this.postos);
       },
       (error) => {
         console.error('Erro ao carregar postos', error);
@@ -335,6 +407,21 @@ export class ListaNceComponent {
     );
   }
 
+  despacharCourse(course: any) {
+    const updatedCourse = {
+      ...course,
+      statusNce: 'EM_ANALISE_CMT',
+    };
+
+    this.coursesService.updateCourse(updatedCourse).subscribe({
+      next: () => {
+        alert('Curso despachado com sucesso!');
+        course.statusNce = 'EM_ANALISE_CMT'; // Atualiza na tela sem precisar recarregar
+      },
+      error: (err) => {
+        console.error('Erro ao despachar curso', err);
+        alert('Erro ao despachar curso.');
+      },
+    });
+  }
 }
-
-

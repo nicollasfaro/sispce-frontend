@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
   providedIn: 'root',
@@ -12,8 +13,7 @@ export class AuthService {
   private rolesSubject = new BehaviorSubject<string[]>([]); // Novo BehaviorSubject para roles
   roles: any[] = [];
 
-  constructor(private http: HttpClient, private router: Router) {}
-  
+  constructor(private http: HttpClient, private router: Router, private snackBar: MatSnackBar) {}
 
   login(username: string, password: string): Observable<any> {
     const headers = { 'Content-Type': 'application/json' };
@@ -21,8 +21,8 @@ export class AuthService {
       .post<any>('/api/login', { username, password }, { headers })
       .pipe(
         tap((response) => {
-          if (response.accessToken) {
-            this.setSession(response.accessToken);
+          if (response.accessToken && response.refreshToken) {
+            this.setSession(response.accessToken, response.refreshToken);
           }
         }),
         catchError(this.handleError<any>('login'))
@@ -67,15 +67,17 @@ export class AuthService {
               console.log('Roles do usuário logado:', roles);
               localStorage.setItem('userRoles', JSON.stringify(roles)); // Armazena as roles no localStorage
               this.rolesSubject.next(roles);
-              const organizacaoMilitarUsuario = currentUser.organizacaoMilitar.nomeInstituicao;
-              sessionStorage.setItem('organizacaoMilitarUsuario', JSON.stringify(organizacaoMilitarUsuario));
-              console.log('Organização Militar do usuário logado:', organizacaoMilitarUsuario);
-              if (roles.includes('ROLE_APROVADOR')) {
-                console.log(this.roles);
-                this.router.navigate(['/listaNce']);
-              } else {
-                this.router.navigate(['/courses']);
-              } // Atualiza as roles no BehaviorSubject
+              const organizacaoMilitarUsuario =
+                currentUser.organizacaoMilitar.nomeInstituicao;
+              sessionStorage.setItem(
+                'organizacaoMilitarUsuario',
+                JSON.stringify(organizacaoMilitarUsuario)
+              );
+              console.log(
+                'Organização Militar do usuário logado:',
+                organizacaoMilitarUsuario
+              );
+              this.router.navigate(['/listaNce']);
             } else {
               console.log('Nenhuma role encontrada para o usuário logado');
             }
@@ -95,10 +97,11 @@ export class AuthService {
     return this.rolesSubject.asObservable(); // Retorna um Observable para as roles
   }
 
-  setSession(token: string): void {
+  setSession(token: string, refreshToken: string): void {
     // Armazena o token JWT no localStorage
     console.log('Armazenando token:', token); // Adicione este log
     localStorage.setItem('authToken', token);
+    localStorage.setItem('refreshToken', refreshToken);
     this.authSubject.next(true);
   }
 
@@ -122,14 +125,52 @@ export class AuthService {
     this.authSubject.next(false); // Indica que o usuário foi deslogado
   }
 
-  registerUser(user: any){
+  registerUser(user: any) {
     const token = localStorage.getItem('authToken');
     const headers = { Authorization: `Bearer ${token}` };
-    return this.http.post<any[]> ('/api/oms', user, {headers});
+    return this.http.post<any[]>('/api/oms', user, { headers });
   }
-  changePassword(user: any){
+  changePassword(user: any) {
     const token = localStorage.getItem('authToken');
     const headers = { Authorization: `Bearer ${token}` };
-    return this.http.put<any[]> ('/api/oms', user, {headers});
+    return this.http.put<any[]>('/api/oms', user, { headers });
   }
+
+  // 🔄 Refresh token
+  refreshToken(): Observable<any> {
+    const refreshToken = localStorage.getItem('refreshToken');
+
+    if (!refreshToken) {
+      this.logout();
+      this.snackBar.open('Sua sessão expirou. Faça login novamente.', 'Fechar', {
+        duration: 4000,
+        panelClass: ['snackbar-error']
+      });
+      return of(null);
+    }
+
+    return this.http.post<any>('/api/refresh', { refreshToken }).pipe(
+      tap((response) => {
+        if (response.accessToken) {
+          localStorage.setItem('authToken', response.accessToken);
+          this.snackBar.open('Sessão renovada automaticamente ✅', 'Ok', {
+            duration: 3000,
+            panelClass: ['snackbar-success']
+          });
+        }
+      }),
+      catchError((error) => {
+        console.error('Erro ao renovar token:', error);
+        this.snackBar.open('Sua sessão expirou. Faça login novamente.', 'Fechar', {
+          duration: 4000,
+          panelClass: ['snackbar-error']
+        });
+        this.logout();
+        return of(null);
+      })
+    );
+  }
+
+
+
 }

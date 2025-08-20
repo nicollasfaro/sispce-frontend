@@ -14,13 +14,10 @@
           disabled="true"
         />
         <label>Posto/Perfil</label>
-        <select
-          class="form-control select"
-          [(ngModel)]="editingCourse.posto"
-        >
-        <option *ngFor="let posto of postos" [value]="posto"
-        >{{posto}}</option
-      >
+        <select class="form-control select" [(ngModel)]="editingCourse.posto">
+          <option *ngFor="let posto of postos" [value]="posto">
+            {{ posto }}
+          </option>
         </select>
         <label for="editCourseName">Conhecimento Específico</label>
         <input
@@ -42,7 +39,7 @@
         (click)="updateCourse()"
         style="margin-right: 5px"
       >
-        Atualizar Curso
+        Atualizar NCE
       </button>
       <button class="btn btn-secondary mt-2" (click)="editingCourse = null">
         Cancelar
@@ -70,11 +67,16 @@
               <!-- <th>Reordenar</th> -->
             </tr>
           </thead>
-          <tbody cdkDropList
-          (cdkDropListDropped)="drop($event)"
-          [cdkDropListData]="courses">
-            <tr *ngFor="let course of courses; let i = index" cdkDrag
-            [cdkDragData]="course">
+          <tbody
+            cdkDropList
+            (cdkDropListDropped)="drop($event)"
+            [cdkDropListData]="courses"
+          >
+            <tr
+              *ngFor="let course of courses; let i = index"
+              cdkDrag
+              [cdkDragData]="course"
+            >
               <td style="text-align: center">
                 {{ course.nceId }}
               </td>
@@ -92,21 +94,30 @@
               </td>
               <td style="text-align: center; padding: 2px">
                 <div
-                  *ngIf="userRoles.includes('ROLE_BASIC') || userRoles.includes('ROLE_ADMIN')"
+                  *ngIf="
+                    userRoles.includes('ROLE_BASIC') ||
+                    userRoles.includes('ROLE_ADMIN')
+                  "
                   class="btn-group"
                   role="group"
                   aria-label="Button group with nested dropdown"
                 >
                   <button
-                  *ngIf="(userRoles.includes('ROLE_BASIC') || userRoles.includes('ROLE_ADMIN')) && course.status == null"
+                    *ngIf="
+                      userRoles.includes('ROLE_BASIC') && course.statusNce === 'CRIADA'
+                    "
                     type="button"
                     class="btn btn-success"
-                    (click)="editCourse(course)"
+                    (click)="despacharCourse(course)"
                   >
-                    <i class="far fa-edit"></i> Editar
+                    <i class="far fa-envelope"></i> Despachar
                   </button>
                   <button
-                  *ngIf="(userRoles.includes('ROLE_BASIC') || userRoles.includes('ROLE_ADMIN')) && course.status == null"
+                    *ngIf="
+                      (userRoles.includes('ROLE_BASIC') ||
+                        userRoles.includes('ROLE_ADMIN')) &&
+                      course.statusNce === 'CRIADA'
+                    "
                     type="button"
                     class="btn btn-danger"
                     (click)="confirmDelete(course.nceId)"
@@ -129,6 +140,12 @@
                       aria-labelledby="btnGroupDrop1"
                       style="cursor: pointer"
                     >
+                      <li *ngIf="userRoles.includes('ROLE_BASIC') &&
+                      course.statusNce === 'CRIADA'">
+                        <a class="dropdown-item" (click)="editCourse(course)"
+                          >Editar NCE</a
+                        >
+                      </li>
                       <li>
                         <a
                           class="dropdown-item"
@@ -137,13 +154,17 @@
                         >
                       </li>
                       <li *ngIf="userRoles.includes('ROLE_ADMIN')">
-                        <a class="dropdown-item" (click)="openUploadModal(course.nceId)"
+                        <a
+                          class="dropdown-item"
+                          (click)="openUploadModal(course.nceId)"
                           >Anexar documentos</a
                         >
                       </li>
                       <li><hr class="dropdown-divider" /></li>
                       <li>
-                        <a class="dropdown-item" (click)="viewNce(course.nceId)">Visualizar NCE</a>
+                        <a class="dropdown-item" (click)="viewNce(course.nceId)"
+                          >Visualizar NCE</a
+                        >
                       </li>
                     </ul>
                   </div>
@@ -155,7 +176,7 @@
                   aria-label="Button group with nested dropdown"
                 >
                   <button
-                  *ngIf="course.status == null"
+                    *ngIf="course.status == null"
                     type="button"
                     class="btn btn-success"
                     (click)="aprovarNce(course)"
@@ -163,15 +184,15 @@
                     Aprovar
                   </button>
                   <button
-                  *ngIf="course.status == null"
+                    *ngIf="course.status == null"
                     type="button"
                     class="btn btn-danger"
-                    
+                    (click)="reprovarNce(course)"
                   >
                     Reprovar
                   </button>
                   <button
-                  *ngIf="course.status == null"
+                    *ngIf="course.status == null"
                     type="button"
                     class="btn btn-warning"
                     (click)="viewNce(course.nceId)"
@@ -181,12 +202,9 @@
                 </div>
               </td>
               <td>
-                {{ course.statusNce }}
+                {{ statusLabels[course.statusNce] || course.statusNce }}
                 <span *ngIf="course.statusNce == null">Em Análise</span>
               </td>
-              <!-- <td>
-                <i class="fas fa-sort-alt"></i> Ord          
-              </td> -->
             </tr>
           </tbody>
         </table>
@@ -266,7 +284,11 @@
         >
           Fechar
         </button>
-        <button type="button" class="btn btn-primary" (click)="uploadFile(nceId)">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="uploadFile(nceId)"
+        >
           Enviar
         </button>
       </div>

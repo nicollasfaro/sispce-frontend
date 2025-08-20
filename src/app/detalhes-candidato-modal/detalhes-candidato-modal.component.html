@@ -1,0 +1,16 @@
+<h2 mat-dialog-title>Detalhes do Candidato</h2>
+
+<mat-dialog-content>
+  <p><strong>Nome:</strong> {{ data?.nome }}</p>
+  <p><strong>Posto:</strong> {{ data?.posto }}</p>
+  <p><strong>OM:</strong> {{ data?.organizacaoMilitar?.nomeInstituicao }}</p>
+  <p><strong>Email:</strong> {{ data?.email }}</p>
+  <p><strong>Celular:</strong> {{ data?.celular }}</p>
+  <p><strong>Estado Civil:</strong> {{ data?.estadoCivil }}</p>
+  <p><strong>Data de Nascimento:</strong> {{ data?.dataDeNascimento | date:'dd/MM/yyyy' }}</p>
+  <p><strong>Tempo de Guarnição:</strong> {{ data?.tempoGuarnicao }} anos</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="fechar()">Fechar</button>
+</mat-dialog-actions>

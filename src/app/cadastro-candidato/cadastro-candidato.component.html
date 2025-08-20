@@ -10,7 +10,7 @@
             <div style="display: grid; margin-top: 10px">
               <mat-form-field>
                 <mat-label>Nome Completo</mat-label>
-                <input matInput formControlName="fullName" required />
+                <input matInput formControlName="fullName" required (input)="formatarNomeCompleto()"/>
                 <mat-error
                   *ngIf="candidateForm.get('fullName')?.hasError('required')"
                 >

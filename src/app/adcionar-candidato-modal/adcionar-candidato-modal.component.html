@@ -1,18 +1,227 @@
-<div style="text-align: center; padding: 5px; margin-top: 20px;">
-    
-    <h3>Incluir Candidato</h3>
-</div>
-<div style="text-align: center;">
-    <mat-form-field appearance="fill" style="width: 80%;">
-      <mat-label>Selecionar Candidato</mat-label>
-      <mat-select [(value)]="selectedCandidate">
-        <mat-option *ngFor="let candidate of candidates" [value]="candidate">
-          {{ candidate.fullName }}
-        </mat-option>
+<h3 style="text-align: center; margin-top: 12px">Incluir Candidato</h3>
+
+<mat-dialog-content style="padding: 16px 20px" [formGroup]="candidateForm">
+  <!-- === EXISTENTE === -->
+  <ng-container *ngIf="!cadastrandoNovo">
+    <mat-form-field appearance="fill" style="width: 100%">
+      <mat-label>Selecionar candidato</mat-label>
+      <mat-select [(value)]="candidatoSelecionado">
+        <mat-option *ngFor="let c of candidatos" [value]="c.id">{{
+          c.nome
+        }}</mat-option>
       </mat-select>
     </mat-form-field>
-</div>
-<div style="text-align: center; padding: 5px; margin-top: 20px;">
-    <button mat-raised-button color="primary" (click)="addCandidateToCourse(course)">Incluir</button>
-    <button mat-button (click)="close()">Cancelar</button>
-</div>
+
+    <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap">
+      <button mat-stroked-button color="primary" (click)="ativarCadastroNovo()">
+        ➕ Cadastrar novo candidato
+      </button>
+    </div>
+  </ng-container>
+
+  <!-- === NOVO === -->
+  <ng-container *ngIf="cadastrandoNovo">
+    <mat-tab-group [(selectedIndex)]="tabIndex">
+      <!-- DADOS PESSOAIS -->
+      <mat-tab label="Dados pessoais">
+        <div style="display: grid; gap: 12px; padding-top: 12px">
+          <mat-form-field appearance="fill">
+            <mat-label>Nome completo</mat-label>
+            <input matInput formControlName="nome" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Data de nascimento</mat-label>
+            <input
+              matInput
+              [matDatepicker]="dtNasc"
+              formControlName="dataDeNascimento"
+            />
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="dtNasc"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #dtNasc></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Naturalidade</mat-label>
+            <input matInput formControlName="naturalidade" />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Estado civil</mat-label>
+            <mat-select formControlName="estadoCivil">
+              <mat-option value="SOLTEIRO">Solteiro(a)</mat-option>
+              <mat-option value="CASADO">Casado(a)</mat-option>
+              <mat-option value="DIVORCIADO">Divorciado(a)</mat-option>
+              <mat-option value="VIUVO">Viúvo(a)</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div style="display: flex; gap: 12px; flex-wrap: wrap">
+            <mat-form-field style="flex: 1" appearance="fill">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" />
+            </mat-form-field>
+
+            <mat-form-field style="flex: 1" appearance="fill">
+              <mat-label>Celular</mat-label>
+              <input matInput formControlName="celular" />
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Posto</mat-label>
+            <mat-select formControlName="posto">
+              <mat-option value="SEGUNDO_TENENTE">Segundo Tenente</mat-option>
+              <mat-option value="CAPITAO">Capitão</mat-option>
+              <mat-option value="MAJOR">Major</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Organização Militar -->
+        <!-- Organização Militar -->
+        <mat-form-field appearance="fill" style="width: 100%">
+          <mat-label>Organização Militar</mat-label>
+          <mat-select formControlName="organizacaoMilitarId">
+            <!-- campo de filtro dentro do painel -->
+             <input
+                type="text"
+                placeholder="Filtrar..."
+                [(ngModel)]="filtroOm"
+                [ngModelOptions]="{standalone:true}"
+                (ngModelChange)="filtrarOms($event)"
+                style="width: 100%; padding: 4px"
+              />
+            <mat-option>
+              
+            </mat-option>
+
+            <!-- opções filtradas -->
+            <mat-option
+              *ngFor="let om of organizacoesFiltradas"
+              [value]="om.omId"
+            >
+              {{ om.sigla }} — {{ om.nomeInstituicao }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </mat-tab>
+
+      <!-- OUTRAS INFORMAÇÕES -->
+      <mat-tab label="Outras informações">
+        <div style="display: grid; gap: 12px; padding-top: 12px">
+          <div style="display: flex; gap: 12px; flex-wrap: wrap">
+            <mat-form-field appearance="fill" style="flex: 1">
+              <mat-label>Inclusão na OM</mat-label>
+              <input
+                matInput
+                [matDatepicker]="dtInc"
+                formControlName="inclusaoOm"
+              />
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="dtInc"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #dtInc></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" style="flex: 1">
+              <mat-label>Apresentação na OM</mat-label>
+              <input
+                matInput
+                [matDatepicker]="dtApr"
+                formControlName="apresentacaoOm"
+              />
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="dtApr"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #dtApr></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" style="flex: 1">
+              <mat-label>Última promoção</mat-label>
+              <input
+                matInput
+                [matDatepicker]="dtUlt"
+                formControlName="ultimaPromocao"
+              />
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="dtUlt"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #dtUlt></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Tempo de guarnição (meses)</mat-label>
+            <input matInput type="number" formControlName="tempoGuarnicao" />
+          </mat-form-field>
+
+          <div style="display: grid; gap: 8px">
+            <label>Inspeção de Saúde</label>
+            <mat-radio-group formControlName="inspecaoSaude">
+              <mat-radio-button value="true">Apto</mat-radio-button>
+              <mat-radio-button value="false">Inapto</mat-radio-button>
+            </mat-radio-group>
+          </div>
+
+          <div style="display: grid; gap: 8px">
+            <label>Designado ou matriculado (&gt; 6 meses)?</label>
+            <mat-radio-group formControlName="designadoOrMatriculado">
+              <mat-radio-button [value]="true">Sim</mat-radio-button>
+              <mat-radio-button [value]="false">Não</mat-radio-button>
+            </mat-radio-group>
+          </div>
+
+          <div style="display: grid; gap: 8px">
+            <label>Sub-judice?</label>
+            <mat-radio-group formControlName="subJudice">
+              <mat-radio-button [value]="true">Sim</mat-radio-button>
+              <mat-radio-button [value]="false">Não</mat-radio-button>
+            </mat-radio-group>
+          </div>
+
+          <div style="display: grid; gap: 8px">
+            <label>Movimentado?</label>
+            <mat-radio-group formControlName="movimentado">
+              <mat-radio-button [value]="true">Sim</mat-radio-button>
+              <mat-radio-button [value]="false">Não</mat-radio-button>
+            </mat-radio-group>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- CURSOS (multi-seleção simples) -->
+      <mat-tab label="Cursos">
+        <div style="padding-top: 12px">
+          <mat-form-field appearance="fill" style="width: 100%">
+            <mat-label>Selecionar cursos</mat-label>
+            <mat-select formControlName="cursos" multiple>
+              <mat-option
+                *ngFor="let curso of cursosDisponiveis"
+                [value]="curso.cursoId"
+              >
+                {{ curso.nome }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div class="text-sm" style="opacity: 0.75">
+            * Nesta versão selecionamos cursos já cadastrados. (Se quiser,
+            depois evoluímos para adicionar novos cursos com uma tabela igual a
+            da tela antiga e salvar em candidato_curso.)
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" style="padding: 12px 20px">
+  <button mat-button (click)="close()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="incluir()">Incluir</button>
+</mat-dialog-actions>

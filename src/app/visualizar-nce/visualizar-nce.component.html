@@ -98,26 +98,37 @@
         </div>
         <hr />
         <div *ngIf="candidatoDetails && candidatoDetails.length">
-          <h5><i class="fas fa-user"></i> Candidatos</h5>
-          <ul class="list-group">
-            <li
-              *ngFor="let candidato of candidatoDetails"
-              class="list-group-item d-flex justify-content-between align-items-center"
-            >
-              <div *ngIf="candidato.nceId == nceDetails.id">
-                {{ candidato.fullName }}
-              </div>
-              <button
-                target="_blank"
-                class="btn btn-danger btn-sm"
-                (click)="confirmDelete(candidato.id)"
-              >
-                <i class="fas fa-trash"></i> Excluir
-              </button>
-            </li>
-          </ul>
-          <hr />
-        </div>
+  <h5><i class="fas fa-user"></i> Candidatos</h5>
+  <ul class="list-group">
+    <li
+      *ngFor="let candidato of candidatoDetails"
+      class="list-group-item d-flex justify-content-between align-items-center"
+    >
+      <div *ngIf="candidato.nceId == nceDetails.id">
+        {{ candidato.nome }}
+      </div>
+      <div class="btn-group">
+        <!-- Botão visualizar -->
+        <button
+          class="btn btn-primary btn-sm"
+          (click)="verDetalhesCandidato(candidato.id)"
+        >
+          <i class="fas fa-eye"></i> Visualizar
+        </button>
+
+        <!-- Botão excluir -->
+        <button
+          class="btn btn-danger btn-sm"
+          (click)="confirmDelete(candidato.id)"
+        >
+          <i class="fas fa-trash"></i> Excluir
+        </button>
+      </div>
+    </li>
+  </ul>
+  <hr />
+</div>
+
         <!-- Seção de Anexos (se houver) -->
         <div *ngIf="nceDetails.attachments && nceDetails.attachments.length">
           <h5><i class="fas fa-paperclip"></i> Anexos</h5>

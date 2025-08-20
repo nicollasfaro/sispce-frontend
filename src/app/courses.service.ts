@@ -11,38 +11,31 @@ export class CoursesService {
   constructor(private http: HttpClient) {}
 
   getCourses(): Observable<any[]> {
-    const token = localStorage.getItem('authToken');
-    const headers = { Authorization: `Bearer ${token}` };
-    return this.http.get<any[]>(this.apiUrl, { headers });
+    return this.http.get<any[]>(this.apiUrl);
   }
 
   getOms(): Observable<any[]> {
-    const token = localStorage.getItem('authToken');
-    const headers = { Authorization: `Bearer ${token}` };
-    return this.http.get<any[]> ('/api/oms', {headers});
+    return this.http.get<any[]> ('/api/oms');
   }
 
   getTipoIes(): Observable<any[]> {
-    const token = localStorage.getItem('authToken');
-    const headers = { Authorization: `Bearer ${token}` };
-    return this.http.get<any[]> ('/api/nces/tipoIES', {headers});
+    return this.http.get<any[]> ('/api/nces/tipoIES');
   }
 
   addCourse(courseData: any): Observable<any> {
-    const token = localStorage.getItem('authToken');
-    const headers = { Authorization: `Bearer ${token}` };
-    return this.http.post<any>(this.apiUrl, courseData, {headers});
-  }
+  return this.http.post<any>(this.apiUrl, courseData);
+}
 
   updateCourse(course: any): Observable<any> {
-    const token = localStorage.getItem('authToken');
-    const headers = { Authorization: `Bearer ${token}` };
-    return this.http.put<any>(`${this.apiUrl}/${course.nceId}`, course, {headers});
+    return this.http.put<any>(`${this.apiUrl}/${course.nceId}`, course);
   }
 
   deleteCourse(id: number): Observable<any> {
-    const token = localStorage.getItem('authToken');
-    const headers = { Authorization: `Bearer ${token}` };
-    return this.http.delete<any>(`${this.apiUrl}/${id}`, {headers});
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
+
+  updatePrioridades(ids: number[]): Observable<any> {
+  return this.http.put('/api/nces/prioridades', ids);
+}
+
 }
