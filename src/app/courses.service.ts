@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Curso } from './adcionar-candidato-modal/adcionar-candidato-modal.component';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CoursesService {
-  private apiUrl = 'http://localhost:8080/nces';  // URL do endpoint de cursos
+  private apiUrl = 'http://localhost:8080/nces'; // URL do endpoint de cursos
 
   constructor(private http: HttpClient) {}
 
@@ -15,16 +16,16 @@ export class CoursesService {
   }
 
   getOms(): Observable<any[]> {
-    return this.http.get<any[]> ('/api/oms');
+    return this.http.get<any[]>('/api/oms');
   }
 
   getTipoIes(): Observable<any[]> {
-    return this.http.get<any[]> ('/api/nces/tipoIES');
+    return this.http.get<any[]>('/api/nces/tipoIES');
   }
 
   addCourse(courseData: any): Observable<any> {
-  return this.http.post<any>(this.apiUrl, courseData);
-}
+    return this.http.post<any>(this.apiUrl, courseData);
+  }
 
   updateCourse(course: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/${course.nceId}`, course);
@@ -35,7 +36,12 @@ export class CoursesService {
   }
 
   updatePrioridades(ids: number[]): Observable<any> {
-  return this.http.put('/api/nces/prioridades', ids);
+    return this.http.put('/api/nces/prioridades', ids);
+  }
+
+  salvarCurso(candidatoId: string, curso: Curso): Observable<Curso> {
+  console.log('>>> Chamando API salvarCurso com:', candidatoId, curso);
+  return this.http.post<Curso>(`/api/candidato/${candidatoId}/cursos`, curso);
 }
 
 }

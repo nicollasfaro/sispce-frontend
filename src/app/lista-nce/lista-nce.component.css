@@ -39,5 +39,23 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   }
+
   
   
+  .timeline-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.timeline-dots .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ccc;
+  cursor: pointer;
+}
+
+.timeline-dots .active {
+  background: #28a745;
+}

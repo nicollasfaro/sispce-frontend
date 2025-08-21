@@ -35,6 +35,23 @@ export class ListaNceComponent {
   status: any[] = [];
   postos: any[] = [];
 
+statusSteps: string[] = [
+  'CRIADA',
+  'EM_ANALISE_CMT',
+  'DEFERIDO_CMT',
+  'INDEFERIDO_CMT',
+  'EM_ANALISE_CADESM',
+  'DEFERIDO_CADESM',
+  'INDEFERIDO_CADESM',
+  'EM_ANALISE_DIRETORIA',
+  'DEFERIDO_DIRETORIA',
+  'INDEFERIDO_DIRETORIA',
+  'EM_ANALISE_EME',
+  'APROVADO_EME',
+  'REPROVADO_EME',
+  'LIBERADO_CANDIDATO'
+];
+
   // labels para exibir no lugar dos enums
   statusLabels: Record<string, string> = {
     CRIADA: 'Criada',
@@ -75,29 +92,13 @@ export class ListaNceComponent {
       statusLabel: this.statusLabels[c.statusNce] || c.statusNce,
     }));
 
-    this.dataService.getCandidates().subscribe((candidatos) => {
-      this.candidatos = candidatos;
-      console.log('Candidatos:', this.candidatos);
-
-      // Verificar se candidatos é um array antes de iterar
-      if (Array.isArray(this.candidatos)) {
-        this.candidatos.forEach((candidato) => {
-          candidato.curso = this.courses.find(
-            (curso) => curso.id === candidato.cursoId
-          );
-          console.log(
-            (candidato.curso = this.courses.find(
-              (curso) => curso.id === candidato.cursoId
-            ))
-          );
-        });
-      } else {
-        console.error('Candidatos is not an array');
-      }
-    });
-
     this.carregaStatus();
   }
+
+  // função auxiliar que retorna a posição do status atual
+getStatusIndex(status: string): number {
+  return this.statusSteps.indexOf(status);
+}
 
   getRoles() {
     this.authService.getUserRoles().subscribe((roles) => {
@@ -150,12 +151,6 @@ export class ListaNceComponent {
     );
   }
 
-  // Função para carregar os cursos do db.json
-  loadCourses() {
-    this.http.get<any[]>('http://localhost:3000/nce').subscribe((data) => {
-      this.courses = data;
-    });
-  }
 
   toggleExpand(cursoId: number, event: Event): void {
     // Evitar que o clique no botão propague o evento de clique na linha

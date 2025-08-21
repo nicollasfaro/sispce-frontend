@@ -49,7 +49,8 @@ import { ChangePasswordComponent } from './change-password/change-password.compo
 import { UsuarioEditModalComponent } from './usuario-edit-modal/usuario-edit-modal.component';
 import { DetalhesCandidatoModalComponent } from './detalhes-candidato-modal/detalhes-candidato-modal.component';
 import localePt from '@angular/common/locales/pt';
-
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { NovoCursoDialogComponent } from './novo-curso-dialog/novo-curso-dialog.component';
 // registra o locale
 registerLocaleData(localePt, 'pt');
 @NgModule({
@@ -70,6 +71,7 @@ registerLocaleData(localePt, 'pt');
     ChangePasswordComponent,
     UsuarioEditModalComponent,
     DetalhesCandidatoModalComponent,
+    NovoCursoDialogComponent,
     
   ],
   imports: [
@@ -80,6 +82,7 @@ registerLocaleData(localePt, 'pt');
     MatTabsModule,
     MatFormFieldModule,
     MatInputModule,
+    MatTooltipModule,
     MatButtonModule,
     MatDialogModule,
     MatSelectModule,

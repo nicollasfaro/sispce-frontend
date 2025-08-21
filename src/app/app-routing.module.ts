@@ -24,8 +24,7 @@ const routes: Routes = [
   {
     path: 'listaNce',
     component: ListaNceComponent,
-    canActivate: [RoleGuard],
-    data: { roles: ['ROLE_ADMIN', 'ROLE_BASIC', 'ROLE_APROVADOR'] },
+    canActivate: [AuthGuard],
   },
   {
     path: 'change-password',

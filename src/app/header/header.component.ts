@@ -12,6 +12,7 @@ export class HeaderComponent {
   isLoggedIn: boolean = false;
   userRoles: string[] = []; // Definir a propriedade userRoles
   username: string | null | undefined;
+  roles: any[] = [];
 
 
   constructor(private authService: AuthService, private router: Router, private themeService: ThemeService) {}

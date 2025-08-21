@@ -5,13 +5,31 @@ import {
   Input,
   OnInit,
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { DataService } from '../data.service';
 import { MatAutocomplete } from '@angular/material/autocomplete';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { NovoCursoDialogComponent } from '../novo-curso-dialog/novo-curso-dialog.component';
+import { CoursesService } from '../courses.service';
+
+export interface Curso {
+  curso_id: number;
+  nomeCurso: string;
+  descricao: string;
+  local: string;
+  dataConclusao: string;
+  grau: number;
+  mencao: string;
+  classificacao: number;
+}
 
 interface OrganizacaoMilitar {
+  cursosDoCandidato: any[];
   omId: number;
   nomeInstituicao: string;
   sigla: string;
@@ -29,25 +47,42 @@ export class AdicionarCandidatoModalComponent implements OnInit {
   cadastrandoNovo = false;
   candidatos: any[] = [];
   organizacoesMilitares: OrganizacaoMilitar[] = [];
-  cursosDisponiveis = [
-    { cursoId: 7, nome: 'Curso de Formação' },
-    { cursoId: 8, nome: 'Curso Avançado' },
-  ];
+  cursosDisponiveis: any[] = []; // vem da API
+  cursosDoCandidato: any[] = []; // lista do candidato atual
 
-  candidatoSelecionado: number | null = null;
+  candidatoSelecionado: any;
+
+  candidatoIdCriado: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private service: DataService,
+    private coursesService: CoursesService,
     private snackBar: MatSnackBar,
+    private dialog: MatDialog,
     private dialogRef: MatDialogRef<AdicionarCandidatoModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { nceId: number }
   ) {}
 
   ngOnInit(): void {
-    this.service
-      .getCandidatos()
-      .subscribe((cs) => (this.candidatos = cs || []));
+    // supondo que o username do logado está no localStorage
+    const usernameLogado = localStorage.getItem('username');
+
+    this.service.getUser().subscribe((users: any[]) => {
+      // 🔹 pega o usuário logado dentro da lista
+      const userLogado = users.find((u) => u.username === usernameLogado);
+
+      if (userLogado) {
+        const omIdUser = userLogado.organizacaoMilitar?.omId;
+
+        // 🔹 busca candidatos e filtra pela OM do usuário logado
+        this.service.getCandidatos().subscribe((cs) => {
+          this.candidatos = (cs || []).filter(
+            (c) => c.organizacaoMilitar?.omId === omIdUser
+          );
+        });
+      }
+    });
 
     this.candidateForm = this.fb.group({
       // pessoais
@@ -80,6 +115,52 @@ export class AdicionarCandidatoModalComponent implements OnInit {
       this.organizacoesMilitares = oms;
       this.organizacoesFiltradas = oms; // inicia com todas
     });
+    // 🔹 Carregar cursos salvos no banco
+    this.coursesService.getCourses().subscribe({
+      next: (cursos: Curso[]) => {
+        this.cursosDisponiveis = cursos;
+      },
+      error: (err) => console.error('Erro ao carregar cursos', err),
+    });
+  }
+
+  getCursoNome(cursoId: number): string {
+    const curso = this.cursosDisponiveis.find((c) => c.curso_id === cursoId);
+    return curso ? curso.nomeCurso : 'Curso não encontrado';
+  }
+
+  abrirModalNovoCurso() {
+    if (!this.candidatoIdCriado) {
+      this.proximo(); // força criar o candidato primeiro
+    }
+    const dialogRef = this.dialog.open(NovoCursoDialogComponent, {
+      width: '600px',
+    });
+
+    dialogRef.afterClosed().subscribe((cursoNovo) => {
+      console.log('>>> afterClosed retornou:', cursoNovo); // DEBUG
+
+      if (cursoNovo) {
+        if (!this.candidatoIdCriado) {
+          console.error('Nenhum candidato criado ainda');
+          return;
+        }
+        console.log('>>> candidatoIdCriado:', this.candidatoIdCriado);
+
+        this.coursesService
+          .salvarCurso(this.candidatoIdCriado, cursoNovo)
+          .subscribe((cursoSalvo: Curso) => {
+            console.log('>>> Curso salvo:', cursoSalvo); // DEBUG
+            this.cursosDoCandidato.push(cursoSalvo);
+            this.cursosDoCandidato = [...this.cursosDoCandidato];
+          });
+      }
+    });
+  }
+
+  removerCurso(curso: any) {
+    this.cursosDoCandidato = this.cursosDoCandidato.filter((c) => c !== curso);
+    // opcional: chamar API de delete
   }
 
   ativarCadastroNovo() {
@@ -97,28 +178,28 @@ export class AdicionarCandidatoModalComponent implements OnInit {
   incluir() {
     // 1) Vínculo de candidato existente
     if (!this.cadastrandoNovo && this.candidatoSelecionado) {
-    this.service
-      .incluirCandidatoNaNce(this.data.nceId, this.candidatoSelecionado)
-      .subscribe({
-        next: () => {
-          this.snackBar.open('Candidato vinculado com sucesso!', 'Fechar', {
-            duration: 3000,
-            horizontalPosition: 'right',
-            verticalPosition: 'top',
-          });
-          this.dialogRef.close(true);
-        },
-        error: (e) => {
-          console.error(e);
-          this.snackBar.open('Erro ao vincular candidato.', 'Fechar', {
-            duration: 3000,
-            horizontalPosition: 'right',
-            verticalPosition: 'top',
-          });
-        },
-      });
-    return;
-  }
+      this.service
+        .incluirCandidatoNaNce(this.data.nceId, this.candidatoSelecionado)
+        .subscribe({
+          next: () => {
+            this.snackBar.open('Candidato vinculado com sucesso!', 'Fechar', {
+              duration: 3000,
+              horizontalPosition: 'right',
+              verticalPosition: 'top',
+            });
+            this.dialogRef.close(true);
+          },
+          error: (e) => {
+            console.error(e);
+            this.snackBar.open('Erro ao vincular candidato.', 'Fechar', {
+              duration: 3000,
+              horizontalPosition: 'right',
+              verticalPosition: 'top',
+            });
+          },
+        });
+      return;
+    }
 
     // 2) Cadastro + vínculo de candidato novo
     if (this.candidateForm.invalid) {
@@ -154,27 +235,63 @@ export class AdicionarCandidatoModalComponent implements OnInit {
     };
 
     this.service.addCandidate(payload).subscribe({
-    next: () => {
-      this.snackBar.open('Candidato cadastrado com sucesso!', 'Fechar', {
-        duration: 3000,
-        horizontalPosition: 'right',
-        verticalPosition: 'top',
-      });
-      this.dialogRef.close(true);
-    },
-    error: (err) => {
-      console.error(err);
-      this.snackBar.open('Erro ao cadastrar candidato.', 'Fechar', {
-        duration: 3000,
-        horizontalPosition: 'right',
-        verticalPosition: 'top',
-      });
-    },
-  });
-  console.log(payload);
+      next: () => {
+        this.snackBar.open('Candidato cadastrado com sucesso!', 'Fechar', {
+          duration: 3000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+        });
+        this.dialogRef.close(true);
+      },
+      error: (err) => {
+        console.error(err);
+        this.snackBar.open('Erro ao cadastrar candidato.', 'Fechar', {
+          duration: 3000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+        });
+      },
+    });
+    console.log(payload);
   }
 
   close() {
     this.dialogRef.close();
+  }
+
+  proximo() {
+    // Se estiver na aba de Dados pessoais ou Outras informações
+    if (this.tabIndex < 2) {
+      if (this.candidateForm.invalid) {
+        this.candidateForm.markAllAsTouched();
+        return;
+      }
+
+      // Se ainda não criou no banco
+      if (this.tabIndex === 1 && !this.candidatoIdCriado) {
+        const payload = this.candidateForm.value;
+        this.service.addCandidate(payload).subscribe({
+          next: (res) => {
+            this.candidatoIdCriado = res.id; // <- guarda o ID
+            this.snackBar.open('Candidato criado!', 'Fechar', {
+              duration: 3000,
+            });
+            this.tabIndex++;
+          },
+          error: () =>
+            this.snackBar.open('Erro ao criar candidato', 'Fechar', {
+              duration: 3000,
+            }),
+        });
+      } else {
+        this.tabIndex++;
+      }
+    }
+    console.log(this.candidatoIdCriado);
+  }
+
+  concluir() {
+    this.snackBar.open('Cadastro concluído!', 'Fechar', { duration: 3000 });
+    this.dialogRef.close(true);
   }
 }

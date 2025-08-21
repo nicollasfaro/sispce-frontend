@@ -104,7 +104,8 @@
                 >
                   <button
                     *ngIf="
-                      userRoles.includes('ROLE_BASIC') && course.statusNce === 'CRIADA'
+                      userRoles.includes('ROLE_BASIC') &&
+                      course.statusNce === 'CRIADA'
                     "
                     type="button"
                     class="btn btn-success"
@@ -140,8 +141,12 @@
                       aria-labelledby="btnGroupDrop1"
                       style="cursor: pointer"
                     >
-                      <li *ngIf="userRoles.includes('ROLE_BASIC') &&
-                      course.statusNce === 'CRIADA'">
+                      <li
+                        *ngIf="
+                          userRoles.includes('ROLE_BASIC') &&
+                          course.statusNce === 'CRIADA'
+                        "
+                      >
                         <a class="dropdown-item" (click)="editCourse(course)"
                           >Editar NCE</a
                         >
@@ -202,8 +207,14 @@
                 </div>
               </td>
               <td>
-                {{ statusLabels[course.statusNce] || course.statusNce }}
-                <span *ngIf="course.statusNce == null">Em Análise</span>
+                <div class="timeline-dots">
+                  <div
+                    *ngFor="let step of statusSteps; let idx = index"
+                    class="dot"
+                    [class.active]="idx <= getStatusIndex(course.statusNce)"
+                    matTooltip="{{ statusLabels[step] || step }}"
+                  ></div>
+                </div>
               </td>
             </tr>
           </tbody>

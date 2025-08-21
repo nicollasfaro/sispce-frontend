@@ -29,7 +29,10 @@
       </li>
       <li
         class="nav-item"
-        *ngIf="isLoggedIn && (userRoles.includes('ROLE_ADMIN') || userRoles.includes('ROLE_BASIC'))"
+        *ngIf="
+          isLoggedIn &&
+          (userRoles.includes('ROLE_ADMIN') || userRoles.includes('ROLE_BASIC'))
+        "
       >
         <a class="nav-link" routerLink="/cadastroCandidato"
           >Cadastro de Candidato</a
@@ -44,11 +47,19 @@
       <li
         class="nav-item"
         *ngIf="isLoggedIn"
-        style="position: absolute; right: 150px; margin-right: 10px; margin-top: 10px;"
+        style="
+          position: absolute;
+          right: 150px;
+          margin-right: 10px;
+          margin-top: 10px;
+        "
       >
-        <span class="navbar-text">
-          Usuário Logado:{{ username }}
-        </span>
+        <div style="margin-top: -20px">
+          <p class="navbar-text">Usuário Logado:{{ username }}</p>
+          <p class="navbar-text" style="margin-top: -30px">
+            Permissão:{{ userRoles }}
+          </p>
+        </div>
       </li>
       <li
         class="nav-item"

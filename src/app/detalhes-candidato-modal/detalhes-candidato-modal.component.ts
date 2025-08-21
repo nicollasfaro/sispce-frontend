@@ -19,6 +19,7 @@ export class DetalhesCandidatoModalComponent {
     this.data.inclusaoOm = new Date(this.data.inclusaoOm);
     this.data.ultimaPromocao = new Date(this.data.ultimaPromocao);
   }
+  console.log(this.data);
 }
 
   fechar(): void {
