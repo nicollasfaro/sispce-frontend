@@ -166,52 +166,112 @@ getStatusIndex(status: string): number {
   }
 
   aprovarNce(course: any) {
-    if (
-      this.userRoles.includes('ROLE_APROVADOR') &&
-      (course.statusNce == 'CRIADA' || course.statusNce == 'EM_ANALISE_CMT')
-    ) {
-      course.pendente = 'CADESM';
-      course.statusNce = 'DEFERIDO_CMT';
-      this.coursesService.updateCourse(course).subscribe((updatedCourse) => {
-        console.log(updatedCourse);
-        console.log(course.pendente);
-        // const index = this.courses.findIndex(course => course.nceId === updatedCourse.nceId);
-        // if (index !== -1) {
-        //   this.courses[index] = updatedCourse;
-        // }
-        this.loadNCES();
-        // this.editingCourse = null;
-      });
-    } else {
+  let novoStatus = '';
+  let novoPendente = '';
+
+  switch (true) {
+    case this.userRoles.includes('ROLE_APROVADOR') &&
+         (course.statusNce === 'CRIADA' || course.statusNce === 'EM_ANALISE_CMT'):
+      novoStatus = 'EM_ANALISE_CMT';
+      novoPendente = 'CMT';
+      break;
+
+    case this.userRoles.includes('ROLE_CMT') &&
+         course.statusNce === 'EM_ANALISE_CMT':
+      novoStatus = 'EM_ANALISE_CADESM';
+      novoPendente = 'CADESM';
+      break;
+
+    case this.userRoles.includes('ROLE_CADESM') &&
+         course.statusNce === 'EM_ANALISE_CADESM':
+      novoStatus = 'EM_ANALISE_DIRETORIA';
+      novoPendente = 'DIRETORIA';
+      break;
+
+    case this.userRoles.includes('ROLE_DIRETORIA') &&
+         course.statusNce === 'EM_ANALISE_DIRETORIA':
+      novoStatus = 'EM_ANALISE_EME';
+      novoPendente = 'EME';
+      break;
+
+    case this.userRoles.includes('ROLE_EME') &&
+         course.statusNce === 'EM_ANALISE_EME':
+      novoStatus = 'LIBERADO_PARA_CANDIDATO';
+      novoPendente = 'CANDIDATO';
+      break;
+
+    default:
       window.alert(
-        'Perfil sem autorização de aprovador ou NCE aguardando entrar em análise!'
+        'Perfil sem autorização ou status incorreto para aprovação!'
       );
-    }
+      return;
   }
 
-  reprovarNce(course: any) {
-    if (
-      this.userRoles.includes('ROLE_APROVADOR') &&
-      (course.statusNce == 'CRIADA' || course.statusNce == 'EM_ANALISE_CMT')
-    ) {
-      course.pendente = 'CADESM';
-      course.statusNce = 'INDEFERIDO_CMT';
-      this.coursesService.updateCourse(course).subscribe((updatedCourse) => {
-        console.log(updatedCourse);
-        console.log(course.pendente);
-        // const index = this.courses.findIndex(course => course.nceId === updatedCourse.nceId);
-        // if (index !== -1) {
-        //   this.courses[index] = updatedCourse;
-        // }
-        this.loadNCES();
-        // this.editingCourse = null;
-      });
-    } else {
-      window.alert(
-        'Perfil sem autorização de aprovador ou NCE aguardando entrar em análise!'
-      );
-    }
+  if (novoStatus && novoPendente) {
+    course.statusNce = novoStatus;
+    course.pendente = novoPendente;
+
+    this.coursesService.updateCourse(course).subscribe((updatedCourse) => {
+      console.log(updatedCourse);
+      this.loadNCES();
+    });
   }
+}
+
+
+  reprovarNce(course: any) {
+  let novoStatus = '';
+  let novoPendente = '';
+
+  switch (true) {
+    case this.userRoles.includes('ROLE_APROVADOR') &&
+         (course.statusNce === 'CRIADA' || course.statusNce === 'EM_ANALISE_CMT'):
+      novoStatus = 'INDEFERIDO_CMT';
+      novoPendente = 'CADESM';
+      break;
+
+    case this.userRoles.includes('ROLE_CMT') &&
+         course.statusNce === 'EM_ANALISE_CMT':
+      novoStatus = 'INDEFERIDO_CMT';
+      novoPendente = 'CADESM';
+      break;
+
+    case this.userRoles.includes('ROLE_CADESM') &&
+         course.statusNce === 'EM_ANALISE_CADESM':
+      novoStatus = 'INDEFERIDO_CADESM';
+      novoPendente = 'DIRETORIA';
+      break;
+
+    case this.userRoles.includes('ROLE_DIRETORIA') &&
+         course.statusNce === 'EM_ANALISE_DIRETORIA':
+      novoStatus = 'INDEFERIDO_DIRETORIA';
+      novoPendente = 'EME';
+      break;
+
+    case this.userRoles.includes('ROLE_EME') &&
+         course.statusNce === 'EM_ANALISE_EME':
+      novoStatus = 'REPROVADO_EME';
+      novoPendente = 'CANDIDATO';
+      break;
+
+    default:
+      window.alert(
+        'Perfil sem autorização ou status incorreto para reprovação!'
+      );
+      return;
+  }
+
+  if (novoStatus) {
+    course.statusNce = novoStatus;
+    course.pendente = novoPendente;
+
+    this.coursesService.updateCourse(course).subscribe((updatedCourse) => {
+      console.log(updatedCourse);
+      this.loadNCES();
+    });
+  }
+}
+
 
   updateCourse(): void {
     if (this.editingCourse.nceId) {

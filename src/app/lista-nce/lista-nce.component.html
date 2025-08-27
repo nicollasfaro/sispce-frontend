@@ -175,7 +175,7 @@
                   </div>
                 </div>
                 <div
-                  *ngIf="userRoles.includes('ROLE_APROVADOR')"
+                  *ngIf="!userRoles.includes('ROLE_BASIC')"
                   class="btn-group"
                   role="group"
                   aria-label="Button group with nested dropdown"
@@ -212,6 +212,11 @@
                     *ngFor="let step of statusSteps; let idx = index"
                     class="dot"
                     [class.active]="idx <= getStatusIndex(course.statusNce)"
+                    [class.rejected]="
+                      idx === getStatusIndex(course.statusNce) &&
+                      (course.statusNce?.startsWith('INDEFERIDO') ||
+                        course.statusNce?.startsWith('REPROVADO'))
+                    "
                     matTooltip="{{ statusLabels[step] || step }}"
                   ></div>
                 </div>

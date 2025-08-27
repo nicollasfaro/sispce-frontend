@@ -59,3 +59,8 @@
 .timeline-dots .active {
   background: #28a745;
 }
+
+.timeline-dots .active.dot.rejected {
+  background: #f44336;
+}
+
