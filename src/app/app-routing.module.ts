@@ -12,6 +12,10 @@ import { RoleGuard } from './role.guard';
 import { NaoAutorizadoComponent } from './nao-autorizado/nao-autorizado.component';
 import { CadastroUsuarioComponent } from './cadastro-usuario/cadastro-usuario.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
+import { AdminGuard } from './admin.guard';
+import { CandidatosComponent } from './candidatos/candidatos.component';
+import { CandidatoVisualizarComponent } from './candidato-visualizar/candidato-visualizar.component';
+import { CandidatoEditarComponent } from './candidato-editar/candidato-editar.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -44,6 +48,26 @@ const routes: Routes = [
     canActivate: [RoleGuard],
     data: { roles: ['ROLE_ADMIN'] },
   },
+  {
+    path: 'candidatos',
+    component: CandidatosComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['ROLE_ADMIN'] },
+  },
+  {
+    path: 'candidatos/:id',
+    component: CandidatoVisualizarComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['ROLE_ADMIN'] },
+  },
+  {
+    path: 'candidatos/editar/:id',
+    component: CandidatoEditarComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['ROLE_ADMIN'] },
+  },
+
+  { path: 'acesso-negado', component: NaoAutorizadoComponent },
   {
     path: 'nce/:id',
     component: VisualizarNceComponent,

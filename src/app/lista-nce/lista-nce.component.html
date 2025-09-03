@@ -50,6 +50,20 @@
   <div *ngIf="courses.length" class="card">
     <div class="card-header">
       <h5 class="mb-0">Lista de NCE's</h5>
+      <div
+        class="d-flex justify-content-end mb-2"
+        style="
+          position: absolute;
+          top: 0;
+          right: 0;
+          margin-top: 10px;
+          margin-right: 10px;
+        "
+      >
+        <button class="btn" (click)="gerarRelatorioPrioridades()">
+          <i class="fas fa-file-pdf"></i> Relatório de Prioridades
+        </button>
+      </div>
     </div>
 
     <div class="card-body">
@@ -153,6 +167,7 @@
                       </li>
                       <li>
                         <a
+                          *ngIf="course.statusNce === 'LIBERADO_CANDIDATO'"
                           class="dropdown-item"
                           (click)="openAddCandidateModal(course.nceId)"
                           >Incluir Candidato</a
@@ -175,7 +190,10 @@
                   </div>
                 </div>
                 <div
-                  *ngIf="!userRoles.includes('ROLE_BASIC')"
+                  *ngIf="
+                    !userRoles.includes('ROLE_BASIC') &&
+                    !userRoles.includes('ROLE_ADMIN')
+                  "
                   class="btn-group"
                   role="group"
                   aria-label="Button group with nested dropdown"

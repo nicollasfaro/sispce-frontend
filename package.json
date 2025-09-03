@@ -27,7 +27,7 @@
     "cors": "^2.8.5",
     "jquery": "^3.7.1",
     "jsonwebtoken": "^9.0.2",
-    "ngx-mask": "^18.0.0",
+    "ngx-mask": "^18.0.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.3"

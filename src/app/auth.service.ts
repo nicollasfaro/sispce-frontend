@@ -68,7 +68,7 @@ export class AuthService {
               localStorage.setItem('userRoles', JSON.stringify(roles)); // Armazena as roles no localStorage
               this.rolesSubject.next(roles);
               const organizacaoMilitarUsuario =
-                currentUser.organizacaoMilitar.nomeInstituicao;
+                currentUser.organizacaoMilitar;
               sessionStorage.setItem(
                 'organizacaoMilitarUsuario',
                 JSON.stringify(organizacaoMilitarUsuario)

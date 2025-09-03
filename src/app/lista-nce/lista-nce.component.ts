@@ -196,7 +196,7 @@ getStatusIndex(status: string): number {
 
     case this.userRoles.includes('ROLE_EME') &&
          course.statusNce === 'EM_ANALISE_EME':
-      novoStatus = 'LIBERADO_PARA_CANDIDATO';
+      novoStatus = 'LIBERADO_CANDIDATO';
       novoPendente = 'CANDIDATO';
       break;
 
@@ -479,4 +479,17 @@ getStatusIndex(status: string): number {
       },
     });
   }
+
+  gerarRelatorioPrioridades() {
+  this.http.get('/api/nces/relatorio-prioridades', { responseType: 'blob' })
+    .subscribe((res: Blob) => {
+      const url = window.URL.createObjectURL(res);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'relatorio_prioridades.pdf';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+}
+
 }

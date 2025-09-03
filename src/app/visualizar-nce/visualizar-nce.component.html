@@ -6,6 +6,7 @@
     >
       <h4 class="mb-0">Detalhes da NCE Nº {{ nceDetails?.id }}</h4>
       <button
+        *ngIf="userRoles.includes('ROLE_BASIC')"
         class="btn btn-warning btn-sm mt-2 mt-sm-0"
         (click)="editNce(nceDetails.nceId)"
         style="position: absolute; right: 0; margin-right: 100px"
@@ -79,55 +80,57 @@
         <div class="row">
           <div class="col-md-6">
             <h5><i class="fas fa-lightbulb"></i> Classificação após Curso</h5>
-            <p>{{ nceDetails.om }}</p>
+            <p>{{ nceDetails.organizacaoMilitar.nomeInstituicao }}</p>
+            <p>{{ nceDetails.organizacaoMilitar.sigla }}</p>
           </div>
           <div class="col-md-6">
             <h5><i class="fas fa-user"></i> Responsável</h5>
             <p>
-              {{ nceDetails.postoResponsavel }} {{ nceDetails.responsavel }}
+              <span style="font-weight: bold">{{ nceDetails.postoResponsavel }}</span> {{ nceDetails.responsavel }}
             </p>
             <p>
               {{ nceDetails.funcao }}
               {{ nceDetails.organizacaoMilitarResponsavel.nomeInstituicao }}
             </p>
             <p>
-              Contato: {{ nceDetails.cellphone }} RITEX: {{ nceDetails.ritex }}
+              Contato: {{ nceDetails.cellphone | mask: '(00) 0 0000-0000' }} RITEX: {{ nceDetails.ritex | mask: '000-0000' }}
             </p>
             <p>{{ nceDetails.mail }}</p>
           </div>
         </div>
         <hr />
         <div *ngIf="candidatoDetails && candidatoDetails.length">
-  <h5><i class="fas fa-user"></i> Candidatos</h5>
-  <ul class="list-group">
-    <li
-      *ngFor="let candidato of candidatoDetails"
-      class="list-group-item d-flex justify-content-between align-items-center"
-    >
-      <div *ngIf="candidato.nceId == nceDetails.id">
-        {{ candidato.nome }}
-      </div>
-      <div class="btn-group">
-        <!-- Botão visualizar -->
-        <button
-          class="btn btn-primary btn-sm"
-          (click)="verDetalhesCandidato(candidato.id)"
-        >
-          <i class="fas fa-eye"></i> Visualizar
-        </button>
+          <h5><i class="fas fa-user"></i> Candidatos</h5>
+          <ul class="list-group">
+            <li
+              *ngFor="let candidato of candidatoDetails"
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <div *ngIf="candidato.nceId == nceDetails.id">
+                {{ candidato.nome }}
+              </div>
+              <div class="btn-group">
+                <!-- Botão visualizar -->
+                <button
+                  class="btn btn-primary btn-sm"
+                  (click)="verDetalhesCandidato(candidato.id)"
+                >
+                  <i class="fas fa-eye"></i> Visualizar
+                </button>
 
-        <!-- Botão excluir -->
-        <button
-          class="btn btn-danger btn-sm"
-          (click)="confirmDelete(candidato.id)"
-        >
-          <i class="fas fa-trash"></i> Excluir
-        </button>
-      </div>
-    </li>
-  </ul>
-  <hr />
-</div>
+                <!-- Botão excluir -->
+                <button
+                  *ngIf="userRoles.includes('ROLE_BASIC')"
+                  class="btn btn-danger btn-sm"
+                  (click)="confirmDelete(candidato.id)"
+                >
+                  <i class="fas fa-trash"></i> Excluir
+                </button>
+              </div>
+            </li>
+          </ul>
+          <hr />
+        </div>
 
         <!-- Seção de Anexos (se houver) -->
         <div *ngIf="nceDetails.attachments && nceDetails.attachments.length">
@@ -156,12 +159,30 @@
           <div class="attachments-grid">
             <div *ngFor="let attachment of attachments" class="attachment-card">
               <div class="file-icon">
-                <img src="assets/icons/pdf-icon.png" *ngIf="attachment.fileType === 'application/pdf'" alt="PDF">
-                <img src="assets/icons/image-icon.png" *ngIf="attachment.fileType.startsWith('image/')" alt="Imagem">
-                <img src="assets/icons/file-icon.png" *ngIf="!attachment.fileType.startsWith('image/') && attachment.fileType !== 'application/pdf'" alt="Arquivo">
+                <img
+                  src="assets/icons/pdf-icon.png"
+                  *ngIf="attachment.fileType === 'application/pdf'"
+                  alt="PDF"
+                />
+                <img
+                  src="assets/icons/image-icon.png"
+                  *ngIf="attachment.fileType.startsWith('image/')"
+                  alt="Imagem"
+                />
+                <img
+                  src="assets/icons/file-icon.png"
+                  *ngIf="
+                    !attachment.fileType.startsWith('image/') &&
+                    attachment.fileType !== 'application/pdf'
+                  "
+                  alt="Arquivo"
+                />
               </div>
               <p class="file-name">{{ attachment.fileName }}</p>
-              <button (click)="downloadFile(attachment.fileName)" class="download-btn">
+              <button
+                (click)="downloadFile(attachment.fileName)"
+                class="download-btn"
+              >
                 ⬇ Baixar
               </button>
             </div>

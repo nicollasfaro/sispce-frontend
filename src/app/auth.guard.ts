@@ -11,18 +11,6 @@ export class AuthGuard implements CanActivate {
 
   constructor(private authService: AuthService, private router: Router) {}
 
-//   canActivate(): Observable<boolean> {
-//     return this.authService.getUser().pipe(
-//       map(user => !!user),  // Verifica se o usuário está autenticado
-//       tap(isAuthenticated => {
-//         if (!isAuthenticated) {
-//           this.router.navigate(['/login']);  // Redireciona para a tela de login se não autenticado
-//         }
-//       })
-//     );
-//   }
-// }
-
 canActivate(): boolean {
   if (this.authService.isLoggedIn()) {
     return true;  // Permite acesso se o usuário está logado

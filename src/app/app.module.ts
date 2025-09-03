@@ -51,6 +51,10 @@ import { DetalhesCandidatoModalComponent } from './detalhes-candidato-modal/deta
 import localePt from '@angular/common/locales/pt';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NovoCursoDialogComponent } from './novo-curso-dialog/novo-curso-dialog.component';
+import { CandidatosComponent } from './candidatos/candidatos.component';
+import { CandidatoVisualizarComponent } from './candidato-visualizar/candidato-visualizar.component';
+import { CandidatoEditarComponent } from './candidato-editar/candidato-editar.component';
+import { NgxMaskPipe  } from 'ngx-mask';
 // registra o locale
 registerLocaleData(localePt, 'pt');
 @NgModule({
@@ -72,6 +76,9 @@ registerLocaleData(localePt, 'pt');
     UsuarioEditModalComponent,
     DetalhesCandidatoModalComponent,
     NovoCursoDialogComponent,
+    CandidatosComponent,
+    CandidatoVisualizarComponent,
+    CandidatoEditarComponent,
     
   ],
   imports: [
@@ -103,7 +110,8 @@ registerLocaleData(localePt, 'pt');
     MatRadioModule,
     MatAutocompleteModule,
     NgxMaskDirective,
-    DragDropModule
+    DragDropModule,
+    NgxMaskPipe
   ],
   providers: [ AuthService, provideNgxMask({ /* opções de cfg */ }), DatePipe, { provide: LOCALE_ID, useValue: 'pt' },
     {
