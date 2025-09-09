@@ -2,72 +2,53 @@
   <mat-tab label="Posto/Perfil">
     <div style="display: grid; margin-top: 10px">
       <mat-form-field>
-        <mat-label>Posto compátivel à ocupação do cargo</mat-label>
-        <mat-select
-          [(ngModel)]="courseData.postoCompativelOcupacaoCargo"
-          required
-        >
-          <mat-option value="Of L Ens Mil Bélico"
-            >Of L Ens Mil Bélico</mat-option
-          >
-          <mat-option value="Of L Ens Mil Sau">Of L Ens Mil Sau</mat-option>
-          <mat-option value="Of L Ens Mil Complementar"
-            >Of L Ens Mil Complementar</mat-option
-          >
-          <mat-option value="Of L Ens Mil Científico-Tecnológico"
-            >Of L Ens Mil Científico-Tecnológico</mat-option
-          >
-        </mat-select>
-        <mat-error
-          *ngIf="
-            courseForm.get('postoCompativelOcupacaoCargo')?.hasError('required')
-          "
-        >
-          Campo é obrigatório
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>Posto/Graduação</mat-label>
-        <mat-select [(ngModel)]="courseData.posto" required>
-          <mat-option *ngFor="let posto of postos" [value]="posto">{{
-            posto
-          }}</mat-option>
-        </mat-select>
-        <mat-error *ngIf="courseForm.get('posto')?.hasError('required')">
-          Campo é obrigatório
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field class="example-full-width">
-        <mat-label>Especialidade</mat-label>
-        <textarea
-          matInput
-          placeholder=""
-          [(ngModel)]="courseData.especialidade"
-          required
-          maxlength="280"
-          (input)="(280 - courseData.especialidade.length)"
-        ></textarea>
-        <mat-error
-          *ngIf="courseForm.get('especialidade')?.hasError('required')"
-        >
-          Campo é obrigatório
-        </mat-error>
-        <mat-hint align="end"
-          >{{ 280 - courseData.especialidade.length }} caracteres
-          restantes</mat-hint
-        >
-      </mat-form-field>
-      <mat-form-field>
         <mat-label>QCP</mat-label>
         <input
           matInput
           [(ngModel)]="courseData.qcp"
+          (ngModelChange)="onQcpChange($event)"
+          (input)="courseData.qcp = (courseData.qcp || '').toUpperCase()"
           required
-          mask="99.9999.999.999"
+          mask="AA.AAAA.AAA.AAA"
+          [dropSpecialCharacters]="false"
+          placeholder="00.0000.000.000"
         />
         <mat-error *ngIf="courseForm.get('qcp')?.hasError('required')">
           QCP é obrigatório
         </mat-error>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Posto compatível à ocupação do cargo</mat-label>
+        <input
+          matInput
+          [(ngModel)]="courseData.postoCompativelOcupacaoCargo"
+          [readonly]="true"
+          [disabled]="true"
+          placeholder="Preenchido automaticamente pelo QCP"
+        />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Posto/Graduação</mat-label>
+        <mat-select
+          [(ngModel)]="courseData.posto"
+          name="posto"
+          [disabled]="true"
+        >
+          <mat-option [value]="courseData.posto">
+            {{ courseData.posto }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="example-full-width">
+        <mat-label>Especialidade</mat-label>
+        <input
+          matInput
+          [(ngModel)]="courseData.especialidade"
+          [readonly]="true"
+          [disabled]="true"
+          placeholder="Preenchido automaticamente pelo QCP"
+        />
       </mat-form-field>
     </div>
   </mat-tab>

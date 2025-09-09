@@ -44,4 +44,13 @@ export class CoursesService {
   return this.http.post<Curso>(`/api/candidato/${candidatoId}/cursos`, curso);
 }
 
+getQcpDetalhes(codigo: string): Observable<any> {
+  return this.http.get<any>(`/api/qcp/detalhes/${codigo}`);
+}
+
+getQualificacoesPorFaixa(postoCodigo: string): Observable<any[]> {
+  return this.http.get<any[]>(`/api/qcp/qualificacoes/${postoCodigo}`);
+}
+
+
 }

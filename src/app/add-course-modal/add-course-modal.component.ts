@@ -13,6 +13,8 @@ import { AuthService } from '../auth.service'; // importa o serviço
   styleUrl: './add-course-modal.component.css',
 })
 export class AddCourseModalComponent {
+  
+  qcpDetalhes: any;
   activeSuggestion = -1;
   emailBeforeAt: string = '';
   showSuggestions: boolean = false;
@@ -338,5 +340,40 @@ export class AddCourseModalComponent {
   applySuggestion(domain: string) {
     this.courseData.mail = this.emailBeforeAt + domain;
     this.showSuggestions = false;
+  }
+
+  onQcpChange(value: string) {
+    const upper = (value || '').toUpperCase();
+    this.courseData.qcp = upper;
+
+    const clean = upper.replace(/\./g, '');
+
+    if (clean.length >= 2) {
+      this.coursesService.getQcpDetalhes(clean).subscribe({
+        next: (res) => {
+          this.qcpDetalhes = res;
+
+          // 🔹 Usa os campos achatados
+          this.courseData.posto = res.postoDescricao || '';
+          this.courseData.postoCompativelOcupacaoCargo =
+            res.qualificacaoDescricao || '';
+          this.courseData.especialidade =
+            res.habilitacoes?.map((h: any) => h.descricao).join(', ') || '';
+
+          this.courseForm.patchValue({
+            posto: res.postoDescricao || '',
+            qualificacao: res.qualificacaoDescricao || '',
+            habilitacao:
+              res.habilitacoes?.map((h: any) => h.descricao).join(', ') || '',
+            postoCompativelOcupacaoCargo: res.qualificacaoDescricao || '',
+          });
+
+          console.log('🔎 QCP Detalhes:', res);
+        },
+        error: (err) => {
+          console.warn('Código QCP não encontrado:', err);
+        },
+      });
+    }
   }
 }

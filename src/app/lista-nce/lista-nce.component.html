@@ -66,6 +66,23 @@
       </div>
     </div>
 
+    <mat-form-field
+      appearance="outline"
+      class="w-25 me-3"
+      style="margin-top: 10px; margin-left: 20px; margin-bottom: -30px"
+    >
+      <mat-label>Ano de Capacitação</mat-label>
+      <mat-select
+        [(value)]="selectedAnoCapacitacao"
+        (selectionChange)="applyAnoCapacitacaoFilter()"
+      >
+        <mat-option value="">Todos</mat-option>
+        <mat-option *ngFor="let ano of anosCapacitacao" [value]="ano">
+          {{ ano }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <div class="card-body">
       <div class="table-container">
         <table width="100%">
@@ -84,10 +101,10 @@
           <tbody
             cdkDropList
             (cdkDropListDropped)="drop($event)"
-            [cdkDropListData]="courses"
+            [cdkDropListData]="dataSource.data"
           >
             <tr
-              *ngFor="let course of courses; let i = index"
+              *ngFor="let course of dataSource.data; let i = index"
               cdkDrag
               [cdkDragData]="course"
             >

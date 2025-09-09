@@ -35,22 +35,25 @@ export class ListaNceComponent {
   status: any[] = [];
   postos: any[] = [];
 
-statusSteps: string[] = [
-  'CRIADA',
-  'EM_ANALISE_CMT',
-  'DEFERIDO_CMT',
-  'INDEFERIDO_CMT',
-  'EM_ANALISE_CADESM',
-  'DEFERIDO_CADESM',
-  'INDEFERIDO_CADESM',
-  'EM_ANALISE_DIRETORIA',
-  'DEFERIDO_DIRETORIA',
-  'INDEFERIDO_DIRETORIA',
-  'EM_ANALISE_EME',
-  'APROVADO_EME',
-  'REPROVADO_EME',
-  'LIBERADO_CANDIDATO'
-];
+  selectedAnoCapacitacao: string = '';
+  anosCapacitacao: number[] = [];
+
+  statusSteps: string[] = [
+    'CRIADA',
+    'EM_ANALISE_CMT',
+    'DEFERIDO_CMT',
+    'INDEFERIDO_CMT',
+    'EM_ANALISE_CADESM',
+    'DEFERIDO_CADESM',
+    'INDEFERIDO_CADESM',
+    'EM_ANALISE_DIRETORIA',
+    'DEFERIDO_DIRETORIA',
+    'INDEFERIDO_DIRETORIA',
+    'EM_ANALISE_EME',
+    'APROVADO_EME',
+    'REPROVADO_EME',
+    'LIBERADO_CANDIDATO',
+  ];
 
   // labels para exibir no lugar dos enums
   statusLabels: Record<string, string> = {
@@ -96,9 +99,9 @@ statusSteps: string[] = [
   }
 
   // função auxiliar que retorna a posição do status atual
-getStatusIndex(status: string): number {
-  return this.statusSteps.indexOf(status);
-}
+  getStatusIndex(status: string): number {
+    return this.statusSteps.indexOf(status);
+  }
 
   getRoles() {
     this.authService.getUserRoles().subscribe((roles) => {
@@ -109,10 +112,31 @@ getStatusIndex(status: string): number {
 
   loadNCES() {
     this.dataService.getNCEs().subscribe((cursos) => {
-      this.courses = cursos;
-      console.log('Cursos:', this.courses);
+      this.courses = cursos.map((c: any) => {
+        const anoCriacao = new Date(c.dataCriacao).getFullYear();
+        const anoCapacitacao = anoCriacao + 2;
+        return { ...c, anoCapacitacao };
+      });
+
+      this.dataSource.data = this.courses;
+
+      // gera lista única de anos disponíveis
+      this.anosCapacitacao = Array.from(
+        new Set(this.courses.map((c) => c.anoCapacitacao.toString()))
+      ).sort();
     });
   }
+
+  applyAnoCapacitacaoFilter() {
+  if (!this.selectedAnoCapacitacao) {
+    this.dataSource.data = this.courses; // sem filtro
+  } else {
+    const anoSelecionado = Number(this.selectedAnoCapacitacao);
+    this.dataSource.data = this.courses.filter(
+      (c) => c.anoCapacitacao === anoSelecionado
+    );
+  }
+}
 
   carregaStatus() {
     this.dataService.getStatusNCE().subscribe((data) => {
@@ -123,10 +147,13 @@ getStatusIndex(status: string): number {
 
   // Método chamado ao soltar o item após arrastar
   drop(event: CdkDragDrop<any[]>) {
-    moveItemInArray(this.courses, event.previousIndex, event.currentIndex);
+    moveItemInArray(
+      this.dataSource.data,
+      event.previousIndex,
+      event.currentIndex
+    );
 
-    // Monta array apenas com os IDs na ordem
-    const idsOrdenados = this.courses.map((c) => c.nceId);
+    const idsOrdenados = this.dataSource.data.map((c) => c.nceId);
 
     this.coursesService.updatePrioridades(idsOrdenados).subscribe(() => {
       this.snackBar.open('Ordem de prioridade salva!', 'Fechar', {
@@ -151,7 +178,6 @@ getStatusIndex(status: string): number {
     );
   }
 
-
   toggleExpand(cursoId: number, event: Event): void {
     // Evitar que o clique no botão propague o evento de clique na linha
     event.stopPropagation();
@@ -166,112 +192,112 @@ getStatusIndex(status: string): number {
   }
 
   aprovarNce(course: any) {
-  let novoStatus = '';
-  let novoPendente = '';
+    let novoStatus = '';
+    let novoPendente = '';
 
-  switch (true) {
-    case this.userRoles.includes('ROLE_APROVADOR') &&
-         (course.statusNce === 'CRIADA' || course.statusNce === 'EM_ANALISE_CMT'):
-      novoStatus = 'EM_ANALISE_CMT';
-      novoPendente = 'CMT';
-      break;
+    switch (true) {
+      case this.userRoles.includes('ROLE_APROVADOR') &&
+        (course.statusNce === 'CRIADA' ||
+          course.statusNce === 'EM_ANALISE_CMT'):
+        novoStatus = 'EM_ANALISE_CMT';
+        novoPendente = 'CMT';
+        break;
 
-    case this.userRoles.includes('ROLE_CMT') &&
-         course.statusNce === 'EM_ANALISE_CMT':
-      novoStatus = 'EM_ANALISE_CADESM';
-      novoPendente = 'CADESM';
-      break;
+      case this.userRoles.includes('ROLE_CMT') &&
+        course.statusNce === 'EM_ANALISE_CMT':
+        novoStatus = 'EM_ANALISE_CADESM';
+        novoPendente = 'CADESM';
+        break;
 
-    case this.userRoles.includes('ROLE_CADESM') &&
-         course.statusNce === 'EM_ANALISE_CADESM':
-      novoStatus = 'EM_ANALISE_DIRETORIA';
-      novoPendente = 'DIRETORIA';
-      break;
+      case this.userRoles.includes('ROLE_CADESM') &&
+        course.statusNce === 'EM_ANALISE_CADESM':
+        novoStatus = 'EM_ANALISE_DIRETORIA';
+        novoPendente = 'DIRETORIA';
+        break;
 
-    case this.userRoles.includes('ROLE_DIRETORIA') &&
-         course.statusNce === 'EM_ANALISE_DIRETORIA':
-      novoStatus = 'EM_ANALISE_EME';
-      novoPendente = 'EME';
-      break;
+      case this.userRoles.includes('ROLE_DIRETORIA') &&
+        course.statusNce === 'EM_ANALISE_DIRETORIA':
+        novoStatus = 'EM_ANALISE_EME';
+        novoPendente = 'EME';
+        break;
 
-    case this.userRoles.includes('ROLE_EME') &&
-         course.statusNce === 'EM_ANALISE_EME':
-      novoStatus = 'LIBERADO_CANDIDATO';
-      novoPendente = 'CANDIDATO';
-      break;
+      case this.userRoles.includes('ROLE_EME') &&
+        course.statusNce === 'EM_ANALISE_EME':
+        novoStatus = 'LIBERADO_CANDIDATO';
+        novoPendente = 'CANDIDATO';
+        break;
 
-    default:
-      window.alert(
-        'Perfil sem autorização ou status incorreto para aprovação!'
-      );
-      return;
+      default:
+        window.alert(
+          'Perfil sem autorização ou status incorreto para aprovação!'
+        );
+        return;
+    }
+
+    if (novoStatus && novoPendente) {
+      course.statusNce = novoStatus;
+      course.pendente = novoPendente;
+
+      this.coursesService.updateCourse(course).subscribe((updatedCourse) => {
+        console.log(updatedCourse);
+        this.loadNCES();
+      });
+    }
   }
-
-  if (novoStatus && novoPendente) {
-    course.statusNce = novoStatus;
-    course.pendente = novoPendente;
-
-    this.coursesService.updateCourse(course).subscribe((updatedCourse) => {
-      console.log(updatedCourse);
-      this.loadNCES();
-    });
-  }
-}
-
 
   reprovarNce(course: any) {
-  let novoStatus = '';
-  let novoPendente = '';
+    let novoStatus = '';
+    let novoPendente = '';
 
-  switch (true) {
-    case this.userRoles.includes('ROLE_APROVADOR') &&
-         (course.statusNce === 'CRIADA' || course.statusNce === 'EM_ANALISE_CMT'):
-      novoStatus = 'INDEFERIDO_CMT';
-      novoPendente = 'CADESM';
-      break;
+    switch (true) {
+      case this.userRoles.includes('ROLE_APROVADOR') &&
+        (course.statusNce === 'CRIADA' ||
+          course.statusNce === 'EM_ANALISE_CMT'):
+        novoStatus = 'INDEFERIDO_CMT';
+        novoPendente = 'CADESM';
+        break;
 
-    case this.userRoles.includes('ROLE_CMT') &&
-         course.statusNce === 'EM_ANALISE_CMT':
-      novoStatus = 'INDEFERIDO_CMT';
-      novoPendente = 'CADESM';
-      break;
+      case this.userRoles.includes('ROLE_CMT') &&
+        course.statusNce === 'EM_ANALISE_CMT':
+        novoStatus = 'INDEFERIDO_CMT';
+        novoPendente = 'CADESM';
+        break;
 
-    case this.userRoles.includes('ROLE_CADESM') &&
-         course.statusNce === 'EM_ANALISE_CADESM':
-      novoStatus = 'INDEFERIDO_CADESM';
-      novoPendente = 'DIRETORIA';
-      break;
+      case this.userRoles.includes('ROLE_CADESM') &&
+        course.statusNce === 'EM_ANALISE_CADESM':
+        novoStatus = 'INDEFERIDO_CADESM';
+        novoPendente = 'DIRETORIA';
+        break;
 
-    case this.userRoles.includes('ROLE_DIRETORIA') &&
-         course.statusNce === 'EM_ANALISE_DIRETORIA':
-      novoStatus = 'INDEFERIDO_DIRETORIA';
-      novoPendente = 'EME';
-      break;
+      case this.userRoles.includes('ROLE_DIRETORIA') &&
+        course.statusNce === 'EM_ANALISE_DIRETORIA':
+        novoStatus = 'INDEFERIDO_DIRETORIA';
+        novoPendente = 'EME';
+        break;
 
-    case this.userRoles.includes('ROLE_EME') &&
-         course.statusNce === 'EM_ANALISE_EME':
-      novoStatus = 'REPROVADO_EME';
-      novoPendente = 'CANDIDATO';
-      break;
+      case this.userRoles.includes('ROLE_EME') &&
+        course.statusNce === 'EM_ANALISE_EME':
+        novoStatus = 'REPROVADO_EME';
+        novoPendente = 'CANDIDATO';
+        break;
 
-    default:
-      window.alert(
-        'Perfil sem autorização ou status incorreto para reprovação!'
-      );
-      return;
+      default:
+        window.alert(
+          'Perfil sem autorização ou status incorreto para reprovação!'
+        );
+        return;
+    }
+
+    if (novoStatus) {
+      course.statusNce = novoStatus;
+      course.pendente = novoPendente;
+
+      this.coursesService.updateCourse(course).subscribe((updatedCourse) => {
+        console.log(updatedCourse);
+        this.loadNCES();
+      });
+    }
   }
-
-  if (novoStatus) {
-    course.statusNce = novoStatus;
-    course.pendente = novoPendente;
-
-    this.coursesService.updateCourse(course).subscribe((updatedCourse) => {
-      console.log(updatedCourse);
-      this.loadNCES();
-    });
-  }
-}
-
 
   updateCourse(): void {
     if (this.editingCourse.nceId) {
@@ -481,15 +507,15 @@ getStatusIndex(status: string): number {
   }
 
   gerarRelatorioPrioridades() {
-  this.http.get('/api/nces/relatorio-prioridades', { responseType: 'blob' })
-    .subscribe((res: Blob) => {
-      const url = window.URL.createObjectURL(res);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'relatorio_prioridades.pdf';
-      a.click();
-      window.URL.revokeObjectURL(url);
-    });
-}
-
+    this.http
+      .get('/api/nces/relatorio-prioridades', { responseType: 'blob' })
+      .subscribe((res: Blob) => {
+        const url = window.URL.createObjectURL(res);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'relatorio_prioridades.pdf';
+        a.click();
+        window.URL.revokeObjectURL(url);
+      });
+  }
 }
