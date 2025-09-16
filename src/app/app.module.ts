@@ -55,6 +55,7 @@ import { CandidatosComponent } from './candidatos/candidatos.component';
 import { CandidatoVisualizarComponent } from './candidato-visualizar/candidato-visualizar.component';
 import { CandidatoEditarComponent } from './candidato-editar/candidato-editar.component';
 import { NgxMaskPipe  } from 'ngx-mask';
+import { LoginSuccessComponent } from './login-success/login-success.component';
 // registra o locale
 registerLocaleData(localePt, 'pt');
 @NgModule({
@@ -79,6 +80,7 @@ registerLocaleData(localePt, 'pt');
     CandidatosComponent,
     CandidatoVisualizarComponent,
     CandidatoEditarComponent,
+    LoginSuccessComponent,
     
   ],
   imports: [

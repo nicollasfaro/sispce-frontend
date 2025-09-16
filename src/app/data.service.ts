@@ -18,11 +18,14 @@ export class DataService {
     );
   }
 
-  getNCEs(): Observable<any[]> {
-  const token = localStorage.getItem('authToken');
-  const headers = { Authorization: `Bearer ${token}` };
+  getNCEs(ano?: number): Observable<any[]> {
 
-  return this.http.get<any[]>('/api/nces', { headers }); // sem responseType: 'text'
+  let url = '/api/nces';
+  if (ano) {
+    url += `?ano=${ano}`;
+  }
+
+  return this.http.get<any[]>(url);
 }
 
   getOms(): Observable<any> {
@@ -103,4 +106,9 @@ export class DataService {
 
     return this.http.get<any[]>(`/api/nces/${nceId}/attachments`, { headers });
   }
+
+  getAnosCapacitacao(): Observable<number[]> {
+
+  return this.http.get<number[]>('/api/nces/anos');
+}
 }

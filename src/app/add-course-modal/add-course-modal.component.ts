@@ -76,6 +76,7 @@ export class AddCourseModalComponent {
     statusNce: 'CRIADA',
     pendente: 'CMT',
     dataCriacao: new Date(),
+    nivelEnsino: '',
   };
 
   constructor(
@@ -117,6 +118,7 @@ export class AddCourseModalComponent {
       ativo: [Boolean, Validators.required],
       statusNce: ['', Validators.required],
       pendente: ['', Validators.required],
+      nivelEnsino: ['', Validators.required],
     });
     this.loadEstados();
     this.loadOms();
@@ -277,6 +279,7 @@ export class AddCourseModalComponent {
       statusNce: '',
       pendente: '',
       dataCriacao: new Date(),
+      nivelEnsino: '',
     };
     this.selectedIndex = 0; // Volta para a primeira aba
   }

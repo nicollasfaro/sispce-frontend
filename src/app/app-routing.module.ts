@@ -16,9 +16,11 @@ import { AdminGuard } from './admin.guard';
 import { CandidatosComponent } from './candidatos/candidatos.component';
 import { CandidatoVisualizarComponent } from './candidato-visualizar/candidato-visualizar.component';
 import { CandidatoEditarComponent } from './candidato-editar/candidato-editar.component';
+import { LoginSuccessComponent } from './login-success/login-success.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
+  { path: 'auth/success', component: LoginSuccessComponent },
   {
     path: 'courses',
     component: CoursesComponent,

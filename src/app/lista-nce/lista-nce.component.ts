@@ -86,15 +86,28 @@ export class ListaNceComponent {
   ) {}
 
   ngOnInit(): void {
-    this.loadNCES();
+    // escuta roles em tempo real
+    this.authService.getUserRoles().subscribe((roles) => {
+      this.userRoles = roles || [];
+      console.log('Roles atualizadas na lista NCE:', this.userRoles);
+    });
+
+    // também escuta usuário em tempo real, se quiser
+    this.authService.currentUser$.subscribe((user) => {
+      if (user) {
+        console.log('Usuário atualizado na lista NCE:', user);
+      }
+    });
+
+    // carrega dados dependentes do backend
+    this.dataService.getAnosCapacitacao().subscribe((anos: number[]) => {
+      this.anosCapacitacao = anos;
+      const anoAtual = new Date().getFullYear() + 2;
+      this.selectedAnoCapacitacao = anoAtual.toString();
+      this.loadNCES();
+    });
+
     this.loadPostos();
-    this.getRoles();
-
-    this.status = this.courses.map((c) => ({
-      ...c,
-      statusLabel: this.statusLabels[c.statusNce] || c.statusNce,
-    }));
-
     this.carregaStatus();
   }
 
@@ -111,32 +124,36 @@ export class ListaNceComponent {
   }
 
   loadNCES() {
-    this.dataService.getNCEs().subscribe((cursos) => {
-      this.courses = cursos.map((c: any) => {
-        const anoCriacao = new Date(c.dataCriacao).getFullYear();
-        const anoCapacitacao = anoCriacao + 2;
-        return { ...c, anoCapacitacao };
-      });
+    const anoSelecionado = Number(this.selectedAnoCapacitacao);
+
+    this.dataService.getNCEs(anoSelecionado).subscribe((cursos) => {
+      this.courses = cursos.map((c: any) => ({
+        ...c,
+        anoCapacitacao: c.anoCapacitacao,
+      }));
 
       this.dataSource.data = this.courses;
-
-      // gera lista única de anos disponíveis
-      this.anosCapacitacao = Array.from(
-        new Set(this.courses.map((c) => c.anoCapacitacao.toString()))
-      ).sort();
     });
   }
 
   applyAnoCapacitacaoFilter() {
-  if (!this.selectedAnoCapacitacao) {
-    this.dataSource.data = this.courses; // sem filtro
-  } else {
+    if (!this.selectedAnoCapacitacao) {
+      // caso nenhum ano esteja selecionado, pega o ano atual
+      const anoAtual = new Date().getFullYear() + 2; // ou +1, depende da tua regra
+      this.selectedAnoCapacitacao = anoAtual.toString();
+    }
+
     const anoSelecionado = Number(this.selectedAnoCapacitacao);
-    this.dataSource.data = this.courses.filter(
-      (c) => c.anoCapacitacao === anoSelecionado
-    );
+
+    this.dataService.getNCEs(anoSelecionado).subscribe((cursos) => {
+      this.courses = cursos.map((c: any) => ({
+        ...c,
+        anoCapacitacao: c.anoCapacitacao,
+      }));
+
+      this.dataSource.data = this.courses;
+    });
   }
-}
 
   carregaStatus() {
     this.dataService.getStatusNCE().subscribe((data) => {
@@ -153,7 +170,13 @@ export class ListaNceComponent {
       event.currentIndex
     );
 
+    // 🔥 Atualiza a prioridade no array local
+    this.dataSource.data.forEach((item, index) => {
+      item.prioridade = index + 1; // ou começa em 0, dependendo da regra do back
+    });
+
     const idsOrdenados = this.dataSource.data.map((c) => c.nceId);
+    console.log(idsOrdenados);
 
     this.coursesService.updatePrioridades(idsOrdenados).subscribe(() => {
       this.snackBar.open('Ordem de prioridade salva!', 'Fechar', {
@@ -243,6 +266,7 @@ export class ListaNceComponent {
         this.loadNCES();
       });
     }
+    console.log(course);
   }
 
   reprovarNce(course: any) {
@@ -385,7 +409,7 @@ export class ListaNceComponent {
       formData.append('file', this.selectedFile, this.selectedFile.name);
 
       // Substitua 'http://localhost:8080/upload' pelo endpoint correto do seu backend
-      this.http.post('http://localhost:8080/upload', formData).subscribe(
+      this.http.post('/api/upload', formData).subscribe(
         (response) => {
           console.log('Upload realizado com sucesso', response);
           this.selectedFile = null;
@@ -442,7 +466,7 @@ export class ListaNceComponent {
     });
 
     this.http
-      .post(`http://localhost:8080/nces/${nceId}/upload`, formData, { headers })
+      .post(`/api/nces/${nceId}/upload`, formData, { headers })
       .subscribe(
         () => {
           console.log('Arquivo enviado com sucesso!');
@@ -507,13 +531,20 @@ export class ListaNceComponent {
   }
 
   gerarRelatorioPrioridades() {
+    // pega o ano selecionado ou o ano atual (corrente + 2)
+    let anoFiltro = this.selectedAnoCapacitacao
+      ? Number(this.selectedAnoCapacitacao)
+      : new Date().getFullYear() + 2;
+
     this.http
-      .get('/api/nces/relatorio-prioridades', { responseType: 'blob' })
+      .get(`/api/nces/relatorio-prioridades?ano=${anoFiltro}`, {
+        responseType: 'blob',
+      })
       .subscribe((res: Blob) => {
         const url = window.URL.createObjectURL(res);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'relatorio_prioridades.pdf';
+        a.download = `relatorio_prioridades_${anoFiltro}.pdf`;
         a.click();
         window.URL.revokeObjectURL(url);
       });

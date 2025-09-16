@@ -50,6 +50,19 @@
           placeholder="Preenchido automaticamente pelo QCP"
         />
       </mat-form-field>
+      <!-- Novo campo: Nível do curso -->
+    <div style="margin-top: 15px">
+      <label class="mat-label">Nível do Curso</label>
+      <mat-radio-group
+        [(ngModel)]="courseData.nivelEnsino"
+        name="nivelEnsino"
+        style="display: flex; gap: 20px; margin-top: 5px"
+      >
+        <mat-radio-button value="M">M - Mestrado</mat-radio-button>
+        <mat-radio-button value="D">D - Doutorado</mat-radio-button>
+        <mat-radio-button value="PD">PD - Pós-doutorado</mat-radio-button>
+      </mat-radio-group>
+    </div>
     </div>
   </mat-tab>
   <mat-tab label="Conhecimento Específico">

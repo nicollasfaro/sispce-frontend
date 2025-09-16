@@ -76,7 +76,6 @@
         [(value)]="selectedAnoCapacitacao"
         (selectionChange)="applyAnoCapacitacaoFilter()"
       >
-        <mat-option value="">Todos</mat-option>
         <mat-option *ngFor="let ano of anosCapacitacao" [value]="ano">
           {{ ano }}
         </mat-option>
@@ -109,7 +108,7 @@
               [cdkDragData]="course"
             >
               <td style="text-align: center">
-                {{ course.nceId }}
+                {{ course.prioridade || "-" }}
               </td>
               <td style="text-align: center">
                 {{ course.posto }}

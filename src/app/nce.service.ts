@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 
 }) export class NceService { 
-    private baseUrl = 'http://localhost:8080/nces'; // URL da API para buscar NCEs
+    private baseUrl = 'https://localhost:8080/nces'; // URL da API para buscar NCEs
 
     constructor(private http: HttpClient, private authService: AuthService) {}
     

@@ -10,7 +10,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class AuthService {
   private authSubject = new BehaviorSubject<boolean>(this.isLoggedIn());
-  private rolesSubject = new BehaviorSubject<string[]>([]); // Novo BehaviorSubject para roles
+  private rolesSubject = new BehaviorSubject<string[]>(
+  JSON.parse(localStorage.getItem('userRoles') || '[]')
+);
   roles: any[] = [];
 
   constructor(private http: HttpClient, private router: Router, private snackBar: MatSnackBar) {}
@@ -119,7 +121,10 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('userRoles');
+    localStorage.removeItem('user');
+    localStorage.removeItem('username');
     sessionStorage.removeItem('organizacaoMilitarUsuario');
     this.rolesSubject.next([]); // Limpa as roles no BehaviorSubject
     this.authSubject.next(false); // Indica que o usuário foi deslogado
@@ -170,6 +175,67 @@ export class AuthService {
       })
     );
   }
+
+
+  loginWithDgp(): void {
+  const clientId = '54b37e55f816312ba0e57a0ef4c1b3cb';
+  const redirectUri = encodeURIComponent('https://localhost:8080/auth/callback');
+  const scope = 'INF_MIL_BASICO';
+  const state = 'xyz123'; // pode ser random/nonce
+
+  window.location.href =
+    `https://acesso.dgp.eb.mil.br/authorize?` +
+    `client_id=${clientId}&redirect_uri=${redirectUri}` +
+    `&response_type=code&scope=${scope}&state=${state}`;
+}
+
+private currentUserSubject = new BehaviorSubject<any | null>(
+  JSON.parse(localStorage.getItem('user') || 'null')
+);
+currentUser$ = this.currentUserSubject.asObservable();
+
+getUserDgp(): Observable<any> {
+  const token = localStorage.getItem('authToken');
+  const headers = { Authorization: `Bearer ${token}` };
+
+  return this.http.get<any>('/api/usuarios-dgp/me', { headers }).pipe(
+    tap((currentUser) => {
+      console.log('Usuário DGP logado encontrado:', currentUser);
+
+      localStorage.setItem('username', currentUser.nomeMilitar);
+      localStorage.setItem('user', JSON.stringify(currentUser));
+
+      const roles = currentUser.roles || [];
+      localStorage.setItem('userRoles', JSON.stringify(roles));
+      this.rolesSubject.next(roles);
+
+      const organizacaoMilitarUsuario = {
+        sigla: currentUser.omSigla,
+        nome: currentUser.omNome,
+      };
+      sessionStorage.setItem(
+        'organizacaoMilitarUsuario',
+        JSON.stringify(organizacaoMilitarUsuario)
+      );
+
+      this.currentUserSubject.next(currentUser);
+    }),
+    catchError((error) => {
+      console.error('Erro ao buscar usuário DGP:', error);
+      return of(null);
+    })
+  );
+}
+
+
+
+getCurrentUser(): any {
+  const user = this.currentUserSubject.value;
+  if (user) return user;
+
+  const stored = localStorage.getItem('username');
+  return stored ? JSON.parse(stored) : null;
+}
 
 
 

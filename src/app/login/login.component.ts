@@ -43,4 +43,7 @@ export class LoginComponent {
     error: err => this.errorMessage = 'Usuário ou senha inválidos'
   });
 }
+onLoginWithDgp() {
+  this.authService.loginWithDgp();
+}
 }

@@ -61,6 +61,14 @@
             >
               Login
             </button>
+            <button
+              type="button"
+              class="btn btn-primary btn-block"
+              style="margin-top: 10px"
+              (click)="onLoginWithDgp()"
+            >
+              Login com DGP
+            </button>
           </form>
 
           <div *ngIf="errorMessage" class="alert alert-danger mt-2">
