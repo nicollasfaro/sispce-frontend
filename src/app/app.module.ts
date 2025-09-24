@@ -22,6 +22,11 @@ import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatDialogContent, MatDialogActions, MatDialogTitle } from '@angular/material/dialog';
 import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
+import { MatBadgeModule } from '@angular/material/badge';
+
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 
 import { AppRoutingModule } from './app-routing.module';
@@ -56,6 +61,7 @@ import { CandidatoVisualizarComponent } from './candidato-visualizar/candidato-v
 import { CandidatoEditarComponent } from './candidato-editar/candidato-editar.component';
 import { NgxMaskPipe  } from 'ngx-mask';
 import { LoginSuccessComponent } from './login-success/login-success.component';
+import { SolicitarAcessoDialogComponent } from './socilitar-acesso-dialog/socilitar-acesso-dialog.component';
 // registra o locale
 registerLocaleData(localePt, 'pt');
 @NgModule({
@@ -81,15 +87,20 @@ registerLocaleData(localePt, 'pt');
     CandidatoVisualizarComponent,
     CandidatoEditarComponent,
     LoginSuccessComponent,
+    SolicitarAcessoDialogComponent,
     
   ],
   imports: [
     BrowserModule,
+    MatBadgeModule,
     AppRoutingModule,
     HttpClientModule,  // Certifique-se de que o módulo HTTP está importado
     FormsModule,  // Se você está usando ngModel
     MatTabsModule,
+    MatMenuModule,
+    MatSlideToggleModule,
     MatFormFieldModule,
+    MatToolbarModule,
     MatInputModule,
     MatTooltipModule,
     MatButtonModule,

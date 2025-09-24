@@ -30,7 +30,8 @@ const routes: Routes = [
   {
     path: 'listaNce',
     component: ListaNceComponent,
-    canActivate: [AuthGuard],
+    canActivate: [RoleGuard],
+    data: { roles: ['ROLE_ADMIN', 'ROLE_BASIC', 'ROLE_APROVADOR', 'ROLE_CMT', 'ROLE_EME', 'ROLE_DIRETORIA', 'ROLE_CADESM'] },
   },
   {
     path: 'change-password',
@@ -73,12 +74,14 @@ const routes: Routes = [
   {
     path: 'nce/:id',
     component: VisualizarNceComponent,
-    canActivate: [AuthGuard],
+    canActivate: [RoleGuard],
+    data: { roles: ['ROLE_ADMIN', 'ROLE_BASIC', 'ROLE_APROVADOR', 'ROLE_CMT', 'ROLE_EME', 'ROLE_DIRETORIA', 'ROLE_CADESM'] },
   },
   {
     path: 'nce/edit/:id',
     component: EditarNceComponent,
-    canActivate: [AuthGuard],
+    canActivate: [RoleGuard],
+    data: { roles: ['ROLE_ADMIN', 'ROLE_BASIC', 'ROLE_APROVADOR', 'ROLE_CMT', 'ROLE_EME', 'ROLE_DIRETORIA', 'ROLE_CADESM'] },
   },
   // { path: 'teste', component: CursosCandidatoTabelaComponent, canActivate: [AuthGuard] },
   { path: '', redirectTo: '/login', pathMatch: 'full' },

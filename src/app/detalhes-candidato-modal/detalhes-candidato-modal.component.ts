@@ -20,6 +20,7 @@ export class DetalhesCandidatoModalComponent {
     this.data.ultimaPromocao = new Date(this.data.ultimaPromocao);
   }
   console.log(this.data);
+  console.log(this.data.curso);
 }
 
   fechar(): void {

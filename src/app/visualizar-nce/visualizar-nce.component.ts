@@ -68,6 +68,7 @@ export class VisualizarNceComponent {
       .get(`/api/nces/attachments/download/${decodedFileName}`, {
         headers,
         responseType: 'blob', // 🔹 Indica que a resposta é um arquivo binário
+        withCredentials: true
       })
       .subscribe(
         (blob) => {

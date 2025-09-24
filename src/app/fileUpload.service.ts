@@ -15,6 +15,6 @@ export class FileUploadService {
     for (const file of files) {
         formData.append('files', file, file.name);
       }
-      return this.http.post(`${this.uploadUrl}/uploads`, formData);
+      return this.http.post(`${this.uploadUrl}/uploads`, formData, {withCredentials: true});
     }
 }

@@ -19,7 +19,11 @@ export class LoginSuccessComponent implements OnInit {
       const refreshToken = params['refreshToken'];
 
       if (accessToken && refreshToken) {
-        this.authService.setSession(accessToken, refreshToken); // ✅ garante que authSubject = true
+        this.authService.setSession(
+          accessToken,
+          refreshToken,
+          Number(params['expiresIn']) // 👈 garante que é number
+        ); // ✅ garante que authSubject = true
         console.log('Tokens armazenados com sucesso! ✅');
 
         this.authService.getUserDgp().subscribe({

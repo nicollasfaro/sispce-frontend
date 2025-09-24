@@ -71,12 +71,12 @@
             </mat-form-field>
           </div>
 
-          <mat-form-field appearance="fill">
-            <mat-label>Posto</mat-label>
-            <mat-select formControlName="posto">
-              <mat-option value="SEGUNDO_TENENTE">Segundo Tenente</mat-option>
-              <mat-option value="CAPITAO">Capitão</mat-option>
-              <mat-option value="MAJOR">Major</mat-option>
+          <mat-form-field>
+            <mat-label>Posto/Graduação</mat-label>
+            <mat-select formControlName="postoId" [disabled]="true">
+              <mat-option *ngFor="let p of postos" [value]="p.id">
+                {{ p.descricao }}
+              </mat-option>
             </mat-select>
           </mat-form-field>
         </div>
@@ -195,87 +195,136 @@
       </mat-tab>
 
       <mat-tab label="Cursos">
-  <div style="padding-top: 12px">
-    <!-- Selecionar cursos já existentes -->
-    <mat-form-field appearance="fill" style="width: 100%">
-      <mat-label>Selecionar cursos existentes</mat-label>
-      <mat-select formControlName="cursos" multiple>
-        <mat-option *ngFor="let curso of cursosDisponiveis" [value]="curso.curso_id">
-          {{ curso.nome }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+        <div style="padding-top: 12px">
+          <!-- Selecionar cursos já existentes -->
+          <mat-form-field appearance="fill" style="width: 100%">
+            <mat-label>Selecionar cursos existentes</mat-label>
+            <mat-select formControlName="cursos" multiple>
+              <mat-option
+                *ngFor="let curso of cursosDisponiveis"
+                [value]="curso.curso_id"
+              >
+                {{ curso.nome }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-    <!-- Botão para adicionar novo curso -->
-    <button mat-raised-button color="primary" (click)="abrirModalNovoCurso()" [disabled]="!candidatoIdCriado">
-      + Adicionar novo curso
-    </button>
-
-    <!-- Lista de cursos já adicionados -->
-    <table mat-table [dataSource]="cursosDoCandidato" class="mat-elevation-z2" style="width: 100%; margin-top: 12px;">
-      
-      <!-- Curso -->
-      <ng-container matColumnDef="curso_id">
-        <th mat-header-cell *matHeaderCellDef> Curso </th>
-        <td mat-cell *matCellDef="let curso"> {{ getCursoNome(curso.curso_id) }} </td>
-      </ng-container>
-
-      <!-- Classificação -->
-      <ng-container matColumnDef="classificacao">
-        <th mat-header-cell *matHeaderCellDef> Classificação </th>
-        <td mat-cell *matCellDef="let curso"> {{ curso.classificacao }} </td>
-      </ng-container>
-
-      <!-- Data Conclusão -->
-      <ng-container matColumnDef="data_conclusao">
-        <th mat-header-cell *matHeaderCellDef> Conclusão </th>
-        <td mat-cell *matCellDef="let curso"> {{ curso.dataConclusao | date:'dd/MM/yyyy' }} </td>
-      </ng-container>
-
-      <!-- Descrição -->
-      <ng-container matColumnDef="descricao">
-        <th mat-header-cell *matHeaderCellDef> Descrição </th>
-        <td mat-cell *matCellDef="let curso"> {{ curso.descricao }} </td>
-      </ng-container>
-
-      <!-- Grau -->
-      <ng-container matColumnDef="grau">
-        <th mat-header-cell *matHeaderCellDef> Grau </th>
-        <td mat-cell *matCellDef="let curso"> {{ curso.grau }} </td>
-      </ng-container>
-
-      <!-- Local -->
-      <ng-container matColumnDef="local">
-        <th mat-header-cell *matHeaderCellDef> Local </th>
-        <td mat-cell *matCellDef="let curso"> {{ curso.local }} </td>
-      </ng-container>
-
-      <!-- Menção -->
-      <ng-container matColumnDef="mencao">
-        <th mat-header-cell *matHeaderCellDef> Menção </th>
-        <td mat-cell *matCellDef="let curso"> {{ curso.mencao }} </td>
-      </ng-container>
-
-      <!-- Ações -->
-      <ng-container matColumnDef="acoes">
-        <th mat-header-cell *matHeaderCellDef> Ações </th>
-        <td mat-cell *matCellDef="let curso">
-          <button mat-icon-button color="warn" (click)="removerCurso(curso)">
-            <mat-icon>delete</mat-icon>
+          <!-- Botão para adicionar novo curso -->
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="abrirModalNovoCurso()"
+            [disabled]="!candidatoIdCriado"
+          >
+            + Adicionar novo curso
           </button>
-        </td>
-      </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="['curso_id','classificacao','data_conclusao','descricao','grau','local','mencao','acoes']"></tr>
-      <tr mat-row *matRowDef="let row; columns: ['curso_id','classificacao','data_conclusao','descricao','grau','local','mencao','acoes'];"></tr>
-    </table>
+          <!-- Lista de cursos já adicionados -->
+          <table
+            mat-table
+            [dataSource]="cursosDoCandidato"
+            class="mat-elevation-z2"
+            style="width: 100%; margin-top: 12px"
+          >
+            <!-- Curso -->
+            <ng-container matColumnDef="curso_id">
+              <th mat-header-cell *matHeaderCellDef>Curso</th>
+              <td mat-cell *matCellDef="let curso">
+                {{ getCursoNome(curso.curso_id) }}
+              </td>
+            </ng-container>
 
-    <div class="text-sm" style="opacity: 0.75; margin-top: 6px;">
-      * Agora é possível selecionar cursos já cadastrados ou adicionar novos cursos com todas as informações necessárias.
-    </div>
-  </div>
-</mat-tab>
+            <!-- Classificação -->
+            <ng-container matColumnDef="classificacao">
+              <th mat-header-cell *matHeaderCellDef>Classificação</th>
+              <td mat-cell *matCellDef="let curso">
+                {{ curso.classificacao }}
+              </td>
+            </ng-container>
 
+            <!-- Data Conclusão -->
+            <ng-container matColumnDef="data_conclusao">
+              <th mat-header-cell *matHeaderCellDef>Conclusão</th>
+              <td mat-cell *matCellDef="let curso">
+                {{ curso.dataConclusao | date : "dd/MM/yyyy" }}
+              </td>
+            </ng-container>
+
+            <!-- Descrição -->
+            <ng-container matColumnDef="descricao">
+              <th mat-header-cell *matHeaderCellDef>Descrição</th>
+              <td mat-cell *matCellDef="let curso">{{ curso.descricao }}</td>
+            </ng-container>
+
+            <!-- Grau -->
+            <ng-container matColumnDef="grau">
+              <th mat-header-cell *matHeaderCellDef>Grau</th>
+              <td mat-cell *matCellDef="let curso">{{ curso.grau }}</td>
+            </ng-container>
+
+            <!-- Local -->
+            <ng-container matColumnDef="local">
+              <th mat-header-cell *matHeaderCellDef>Local</th>
+              <td mat-cell *matCellDef="let curso">{{ curso.local }}</td>
+            </ng-container>
+
+            <!-- Menção -->
+            <ng-container matColumnDef="mencao">
+              <th mat-header-cell *matHeaderCellDef>Menção</th>
+              <td mat-cell *matCellDef="let curso">{{ curso.mencao }}</td>
+            </ng-container>
+
+            <!-- Ações -->
+            <ng-container matColumnDef="acoes">
+              <th mat-header-cell *matHeaderCellDef>Ações</th>
+              <td mat-cell *matCellDef="let curso">
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="removerCurso(curso)"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr
+              mat-header-row
+              *matHeaderRowDef="[
+                'curso_id',
+                'classificacao',
+                'data_conclusao',
+                'descricao',
+                'grau',
+                'local',
+                'mencao',
+                'acoes'
+              ]"
+            ></tr>
+            <tr
+              mat-row
+              *matRowDef="
+                let row;
+                columns: [
+                  'curso_id',
+                  'classificacao',
+                  'data_conclusao',
+                  'descricao',
+                  'grau',
+                  'local',
+                  'mencao',
+                  'acoes'
+                ]
+              "
+            ></tr>
+          </table>
+
+          <div class="text-sm" style="opacity: 0.75; margin-top: 6px">
+            * Agora é possível selecionar cursos já cadastrados ou adicionar
+            novos cursos com todas as informações necessárias.
+          </div>
+        </div>
+      </mat-tab>
     </mat-tab-group>
   </ng-container>
 </mat-dialog-content>
@@ -283,27 +332,30 @@
 <mat-dialog-actions align="end" style="padding: 12px 20px">
   <button mat-button (click)="close()">Cancelar</button>
 
-  <button 
-    mat-raised-button 
-    color="primary" 
-    *ngIf="tabIndex < 2 && tabIndex > 0" 
-    (click)="proximo()">
+  <button
+    mat-raised-button
+    color="primary"
+    *ngIf="tabIndex < 2 && tabIndex > 0"
+    (click)="proximo()"
+  >
     Próximo
   </button>
 
-  <button 
-    mat-raised-button 
-    color="primary" 
-    *ngIf="tabIndex === 2 && tabIndex" 
-    (click)="concluir()">
+  <button
+    mat-raised-button
+    color="primary"
+    *ngIf="tabIndex === 2 && tabIndex"
+    (click)="concluir()"
+  >
     Concluir
   </button>
 
-  <button 
-    mat-raised-button 
-    color="primary" 
-    *ngIf="tabIndex === 0" 
-    (click)="incluir()">
+  <button
+    mat-raised-button
+    color="primary"
+    *ngIf="tabIndex === 0 && candidatoSelecionado"
+    (click)="incluir()"
+  >
     Incluir
   </button>
 </mat-dialog-actions>

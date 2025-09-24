@@ -1,53 +1,5 @@
 <div class="container mt-4">
-  <!-- Editar Curso -->
-  <div *ngIf="editingCourse" class="card mb-4" style="width: 100%">
-    <div class="card-header">
-      <h5 class="mb-0">Editar NCE</h5>
-    </div>
-    <div class="card-body">
-      <div class="form-group">
-        <label>Nº Ord</label>
-        <input
-          id="editCourseName"
-          [(ngModel)]="editingCourse.nceId"
-          class="form-control"
-          disabled="true"
-        />
-        <label>Posto/Perfil</label>
-        <select class="form-control select" [(ngModel)]="editingCourse.posto">
-          <option *ngFor="let posto of postos" [value]="posto">
-            {{ posto }}
-          </option>
-        </select>
-        <label for="editCourseName">Conhecimento Específico</label>
-        <input
-          id="editCourseName"
-          [(ngModel)]="editingCourse.conhecimentoEspacifico"
-          class="form-control"
-          placeholder="Digite o novo nome do curso"
-        />
-        <label for="editCourseName">Aplicação/PAC</label>
-        <input
-          id="editCourseName"
-          [(ngModel)]="editingCourse.aplicacaoPac"
-          class="form-control"
-          placeholder="Digite o novo nome do curso"
-        />
-      </div>
-      <button
-        class="btn btn-success mt-2"
-        (click)="updateCourse()"
-        style="margin-right: 5px"
-      >
-        Atualizar NCE
-      </button>
-      <button class="btn btn-secondary mt-2" (click)="editingCourse = null">
-        Cancelar
-      </button>
-    </div>
-  </div>
-
-  <div *ngIf="courses.length" class="card">
+  <div class="card">
     <div class="card-header">
       <h5 class="mb-0">Lista de NCE's</h5>
       <div
@@ -83,7 +35,11 @@
     </mat-form-field>
 
     <div class="card-body">
-      <div class="table-container">
+      <!-- Mensagem quando não há cursos -->
+      <div *ngIf="!courses.length" class="alert alert-info mt-4">
+        Nenhum curso disponível para o ano de capacitação selecionado.
+      </div>
+      <div *ngIf="courses.length" class="table-container">
         <table width="100%">
           <thead>
             <tr>
@@ -111,7 +67,7 @@
                 {{ course.prioridade || "-" }}
               </td>
               <td style="text-align: center">
-                {{ course.posto }}
+                {{ course.posto.descricao }}
               </td>
               <td class="limitarTd">
                 {{ course.conhecimentoEspacifico }}
@@ -171,16 +127,6 @@
                       aria-labelledby="btnGroupDrop1"
                       style="cursor: pointer"
                     >
-                      <li
-                        *ngIf="
-                          userRoles.includes('ROLE_BASIC') &&
-                          course.statusNce === 'CRIADA'
-                        "
-                      >
-                        <a class="dropdown-item" (click)="editCourse(course)"
-                          >Editar NCE</a
-                        >
-                      </li>
                       <li>
                         <a
                           *ngIf="course.statusNce === 'LIBERADO_CANDIDATO'"
@@ -196,7 +142,7 @@
                           >Anexar documentos</a
                         >
                       </li>
-                      <li><hr class="dropdown-divider" /></li>
+                      <li *ngIf="userRoles.includes('ROLE_ADMIN')"><hr class="dropdown-divider" /></li>
                       <li>
                         <a class="dropdown-item" (click)="viewNce(course.nceId)"
                           >Visualizar NCE</a
@@ -266,11 +212,6 @@
         showFirstLastButtons
       ></mat-paginator>
     </div>
-  </div>
-
-  <!-- Mensagem quando não há cursos -->
-  <div *ngIf="!courses.length" class="alert alert-info mt-4">
-    Nenhum curso disponível.
   </div>
 </div>
 

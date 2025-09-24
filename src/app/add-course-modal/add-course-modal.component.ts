@@ -13,7 +13,6 @@ import { AuthService } from '../auth.service'; // importa o serviço
   styleUrl: './add-course-modal.component.css',
 })
 export class AddCourseModalComponent {
-  
   qcpDetalhes: any;
   activeSuggestion = -1;
   emailBeforeAt: string = '';
@@ -49,7 +48,7 @@ export class AddCourseModalComponent {
 
   courseData = {
     postoCompativelOcupacaoCargo: '',
-    posto: '',
+    posto: {} as any,
     especialidade: '',
     conhecimentoEspacifico: '',
     qcp: '',
@@ -66,12 +65,12 @@ export class AddCourseModalComponent {
     objetivoEstrategico: '',
     estrategia: '',
     organizacaoMilitar: {} as any,
-    postoResponsavel: '',
+    postoResponsavel: {} as any,
     funcao: '',
     ritex: '',
     cellphone: '',
     mail: '',
-    organizacaoMilitarResponsavel: [],
+    organizacaoMilitarResponsavel: {} as any,
     ativo: true,
     statusNce: 'CRIADA',
     pendente: 'CMT',
@@ -105,7 +104,7 @@ export class AddCourseModalComponent {
       aplicacaoPac: ['', Validators.required],
       responsavel: ['', Validators.required],
       duracaoAnos: ['', Validators.required],
-      observacao: ['', Validators.required],
+      observacao: [''],
       objetivoEstrategico: ['', Validators.required],
       estrategia: ['', Validators.required],
       organizacaoMilitar: [[], Validators.required],
@@ -125,16 +124,19 @@ export class AddCourseModalComponent {
     this.loadPostos();
     this.loadTipoIes();
 
-    // 🔑 Recupera a OM do usuário logado
-    const omUsuario = sessionStorage.getItem('organizacaoMilitarUsuario');
-    if (omUsuario) {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
       try {
-        const omObj = JSON.parse(omUsuario); // Exemplo: { id: 1, nomeInstituicao: "Colégio Militar Do Rio De Janeiro" }
-        this.courseData.organizacaoMilitar = omObj;
-        this.courseForm.get('organizacaoMilitar')?.setValue(omObj);
-        console.log('OM preenchida automaticamente:', omObj);
+        const userObj = JSON.parse(storedUser);
+        if (userObj.omCod) {
+          this.coursesService.getOmByCodom(userObj.omCod).subscribe((om) => {
+            this.courseData.organizacaoMilitar = om;
+            this.courseForm.get('organizacaoMilitar')?.setValue(om);
+            console.log('OM carregada do backend:', om);
+          });
+        }
       } catch (e) {
-        console.error('Erro ao converter OM do sessionStorage', e);
+        console.error('Erro ao converter user do localStorage', e);
       }
     }
   }
@@ -356,15 +358,22 @@ export class AddCourseModalComponent {
         next: (res) => {
           this.qcpDetalhes = res;
 
-          // 🔹 Usa os campos achatados
-          this.courseData.posto = res.postoDescricao || '';
+          // 🔹 Busca o posto pelo código retornado no res.postoCodigo
+          const postoEncontrado = this.postos.find(
+            (p: any) => p.codigo === res.postoCodigo
+          );
+
+          // 🔹 Monta o objeto posto (se achou na lista)
+          this.courseData.posto = postoEncontrado || null;
+          console.log('🔎 Posto encontrado:', postoEncontrado);
+          // 🔹 Continua preenchendo os outros campos
           this.courseData.postoCompativelOcupacaoCargo =
             res.qualificacaoDescricao || '';
           this.courseData.especialidade =
             res.habilitacoes?.map((h: any) => h.descricao).join(', ') || '';
 
           this.courseForm.patchValue({
-            posto: res.postoDescricao || '',
+            posto: postoEncontrado ? postoEncontrado.descricao : '',
             qualificacao: res.qualificacaoDescricao || '',
             habilitacao:
               res.habilitacoes?.map((h: any) => h.descricao).join(', ') || '',
@@ -372,6 +381,7 @@ export class AddCourseModalComponent {
           });
 
           console.log('🔎 QCP Detalhes:', res);
+          console.log('✅ Posto encontrado:', postoEncontrado);
         },
         error: (err) => {
           console.warn('Código QCP não encontrado:', err);

@@ -133,6 +133,7 @@ export class ListaNceComponent {
       }));
 
       this.dataSource.data = this.courses;
+      console.log(this.courses);
     });
   }
 
@@ -191,7 +192,7 @@ export class ListaNceComponent {
   saveReorderedCourses() {
     // Atualize o servidor aqui após o reordenamento
     // Exemplo de chamada HTTP para salvar a nova ordem
-    this.http.put('/api/nces', this.courses).subscribe(
+    this.http.put('/api/nces', this.courses, {withCredentials: true}).subscribe(
       (response) => {
         console.log('Ordem salva com sucesso:', response);
       },
@@ -409,7 +410,7 @@ export class ListaNceComponent {
       formData.append('file', this.selectedFile, this.selectedFile.name);
 
       // Substitua 'http://localhost:8080/upload' pelo endpoint correto do seu backend
-      this.http.post('/api/upload', formData).subscribe(
+      this.http.post('/api/upload', formData, {withCredentials: true}).subscribe(
         (response) => {
           console.log('Upload realizado com sucesso', response);
           this.selectedFile = null;
@@ -466,7 +467,7 @@ export class ListaNceComponent {
     });
 
     this.http
-      .post(`/api/nces/${nceId}/upload`, formData, { headers })
+      .post(`/api/nces/${nceId}/upload`, formData, { headers, withCredentials: true })
       .subscribe(
         () => {
           console.log('Arquivo enviado com sucesso!');
@@ -538,7 +539,7 @@ export class ListaNceComponent {
 
     this.http
       .get(`/api/nces/relatorio-prioridades?ano=${anoFiltro}`, {
-        responseType: 'blob',
+        responseType: 'blob', withCredentials: true
       })
       .subscribe((res: Blob) => {
         const url = window.URL.createObjectURL(res);

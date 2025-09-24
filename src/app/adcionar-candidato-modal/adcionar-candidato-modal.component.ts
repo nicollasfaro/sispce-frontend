@@ -16,6 +16,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NovoCursoDialogComponent } from '../novo-curso-dialog/novo-curso-dialog.component';
 import { CoursesService } from '../courses.service';
+import { CandidatoService } from '../candidato.service';
 
 export interface Curso {
   curso_id: number;
@@ -49,6 +50,7 @@ export class AdicionarCandidatoModalComponent implements OnInit {
   organizacoesMilitares: OrganizacaoMilitar[] = [];
   cursosDisponiveis: any[] = []; // vem da API
   cursosDoCandidato: any[] = []; // lista do candidato atual
+  postos: any[] = [];
 
   candidatoSelecionado: any;
 
@@ -60,29 +62,16 @@ export class AdicionarCandidatoModalComponent implements OnInit {
     private coursesService: CoursesService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
+    private candidatoService: CandidatoService,
+    private dataService: DataService,
     private dialogRef: MatDialogRef<AdicionarCandidatoModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { nceId: number }
   ) {}
 
   ngOnInit(): void {
-    // supondo que o username do logado está no localStorage
-    const usernameLogado = localStorage.getItem('username');
+    this.loadPostos();
 
-    this.service.getUser().subscribe((users: any[]) => {
-      // 🔹 pega o usuário logado dentro da lista
-      const userLogado = users.find((u) => u.username === usernameLogado);
-
-      if (userLogado) {
-        const omIdUser = userLogado.organizacaoMilitar?.omId;
-
-        // 🔹 busca candidatos e filtra pela OM do usuário logado
-        this.service.getCandidatos().subscribe((cs) => {
-          this.candidatos = (cs || []).filter(
-            (c) => c.organizacaoMilitar?.omId === omIdUser
-          );
-        });
-      }
-    });
+    console.log(this.candidatos);
 
     this.candidateForm = this.fb.group({
       // pessoais
@@ -92,7 +81,7 @@ export class AdicionarCandidatoModalComponent implements OnInit {
       estadoCivil: ['SOLTEIRO', Validators.required],
       email: [''],
       celular: [''],
-      posto: ['SEGUNDO_TENENTE', Validators.required],
+      postoId: ['', Validators.required],
 
       // outras
       inclusaoOm: [null],
@@ -122,6 +111,14 @@ export class AdicionarCandidatoModalComponent implements OnInit {
       },
       error: (err) => console.error('Erro ao carregar cursos', err),
     });
+    // 🔹 Carrega candidatos
+  this.candidatoService.getAll().subscribe({
+    next: (candidatos) => {
+      this.candidatos = candidatos;
+      console.log('Candidatos carregados:', candidatos);
+    },
+    error: (err) => console.error('Erro ao carregar candidatos', err),
+  });
   }
 
   getCursoNome(cursoId: number): string {
@@ -288,10 +285,23 @@ export class AdicionarCandidatoModalComponent implements OnInit {
       }
     }
     console.log(this.candidatoIdCriado);
+    console.log(this.candidateForm.value);
   }
 
   concluir() {
     this.snackBar.open('Cadastro concluído!', 'Fechar', { duration: 3000 });
     this.dialogRef.close(true);
+  }
+
+  loadPostos() {
+    this.dataService.getPostos().subscribe(
+      (data) => {
+        this.postos = data;
+        console.log(this.postos);
+      },
+      (error) => {
+        console.error('Erro ao carregar postos', error);
+      }
+    );
   }
 }

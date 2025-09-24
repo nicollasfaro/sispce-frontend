@@ -21,9 +21,14 @@ export class TokenInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = localStorage.getItem('authToken');
+
     let authReq = req;
 
-    if (token) {
+    // ❌ não adiciona Authorization no refresh/login/callback
+    if (token && 
+        !req.url.includes('/refresh') && 
+        !req.url.includes('/login') && 
+        !req.url.includes('/auth/callback')) {
       authReq = req.clone({
         setHeaders: { Authorization: `Bearer ${token}` }
       });
@@ -44,3 +49,4 @@ export class TokenInterceptor implements HttpInterceptor {
     );
   }
 }
+

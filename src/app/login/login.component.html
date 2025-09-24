@@ -1,14 +1,17 @@
 <div class="container">
   <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-      <div class="card mt-5">
-        <div class="card-header text-center">
-          <h3>Login</h3>
+    <div class="col-md-6 col-lg-5">
+      <div class="card mt-5 shadow">
+        <div class="card-header text-center bg-primary text-white" style="height: 60px;">
+          <h3>SisPCE</h3>
         </div>
         <div class="card-body">
-          <form (ngSubmit)="onLogin()" #loginForm="ngForm">
-            <div class="form-group">
-              <label for="username">Username</label>
+          <form #loginForm="ngForm">
+            <!-- Login padrão -->
+            <h5 class="text-center mb-3">Painel de Login</h5>
+
+            <div class="form-group mb-3">
+              <label for="username">Usuário</label>
               <input
                 type="text"
                 id="username"
@@ -16,11 +19,12 @@
                 [(ngModel)]="username"
                 required
                 class="form-control"
+                placeholder="Digite seu usuário"
               />
             </div>
 
-            <div class="form-group">
-              <label for="password">Password</label>
+            <div class="form-group mb-3">
+              <label for="password">Senha</label>
               <input
                 type="password"
                 id="password"
@@ -28,18 +32,20 @@
                 [(ngModel)]="password"
                 required
                 class="form-control"
+                placeholder="Digite sua senha"
               />
             </div>
 
             <!-- CAPTCHA -->
-            <div class="form-group">
+            <div class="form-group mb-3">
               <label>Digite o código abaixo:</label>
-              <div class="captcha-box">
-                <strong>{{ captchaCode }}</strong>
+              <div class="d-flex align-items-center captcha-box mb-2">
+                <strong class="border rounded px-3 py-2 bg-light">{{ captchaCode }}</strong>
                 <button
                   type="button"
-                  class="btn btn-link"
+                  class="btn btn-outline-secondary btn-sm ms-2"
                   (click)="generateCaptcha()"
+                  title="Gerar novo código"
                 >
                   ↻
                 </button>
@@ -51,27 +57,38 @@
                 name="captchaInput"
                 required
                 class="form-control"
+                placeholder="Digite o código acima"
               />
             </div>
 
             <button
               type="submit"
-              class="btn btn-primary btn-block"
+              class="btn btn-primary w-100"
               style="margin-top: 10px"
             >
-              Login
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary btn-block"
-              style="margin-top: 10px"
-              (click)="onLoginWithDgp()"
-            >
-              Login com DGP
+              Entrar
             </button>
           </form>
 
-          <div *ngIf="errorMessage" class="alert alert-danger mt-2">
+          <!-- Divisor visual -->
+          <div class="text-center my-3">
+            <span class="text-muted">ou</span>
+          </div>
+
+          <!-- Login com DGP -->
+          <div class="alert alert-info text-center p-2">
+            <strong>⚠️ Atenção:</strong> Se você é <u>militar</u>, utilize o botão abaixo para acessar com seu login DGP.
+          </div>
+          <button
+            type="button"
+            class="btn btn-success w-100"
+            (click)="onLoginWithDgp()"
+          >
+            <i class="fas fa-id-card"></i> Login com DGP
+          </button>
+
+          <!-- Mensagem de erro -->
+          <div *ngIf="errorMessage" class="alert alert-danger mt-3">
             {{ errorMessage }}
           </div>
         </div>

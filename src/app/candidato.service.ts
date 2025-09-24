@@ -11,18 +11,18 @@ export class CandidatoService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}`);
+    return this.http.get<any[]>(`${this.apiUrl}`, {withCredentials: true});
   }
 
   getById(id: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+    return this.http.get<any>(`${this.apiUrl}/${id}`, {withCredentials: true});
   }
 
   update(id: string, candidato: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, candidato);
+    return this.http.put<any>(`${this.apiUrl}/${id}`, candidato, {withCredentials: true});
   }
 
   delete(id: number): Observable<any> {
-    return this.http.delete<any>(`/api/candidato/${id}`);
+    return this.http.delete<any>(`/api/candidato/${id}`, {withCredentials: true});
   }
 }
