@@ -1,0 +1,26 @@
+<div class="container mt-4" *ngIf="candidato">
+  <h3>Editar Candidato</h3>
+  <form (ngSubmit)="salvar()">
+    <div class="form-group">
+      <label>Nome</label>
+      <input class="form-control" [(ngModel)]="candidato.nome" name="nome">
+    </div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input class="form-control" [(ngModel)]="candidato.email" name="email">
+    </div>
+
+    <div class="form-group">
+      <label>Celular</label>
+      <input class="form-control" [(ngModel)]="candidato.celular" name="celular">
+    </div>
+
+    <div class="form-group">
+      <label>Posto</label>
+      <input class="form-control" [(ngModel)]="candidato.posto" name="posto">
+    </div>
+
+    <button class="btn btn-primary mt-2" type="submit">Salvar</button>
+  </form>
+</div>

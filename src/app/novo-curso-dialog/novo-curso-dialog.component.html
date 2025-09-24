@@ -1,0 +1,83 @@
+<h1 mat-dialog-title>Novo Curso</h1>
+
+<form [formGroup]="formCurso" (ngSubmit)="salvar()">
+  <div mat-dialog-content>
+    <!-- Curso -->
+    <mat-form-field appearance="fill" style="width: 100%">
+      <mat-label>Curso</mat-label>
+      <input matInput formControlName="nomeCurso" />
+      <mat-error *ngIf="formCurso.get('nomeCurso')?.hasError('required')">
+        Obrigatório
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Classificação -->
+    <mat-form-field appearance="fill" style="width: 100%">
+      <mat-label>Classificação</mat-label>
+      <input matInput formControlName="classificacao" />
+      <mat-error *ngIf="formCurso.get('classificacao')?.hasError('required')">
+        Obrigatório
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Data de conclusão -->
+    <mat-form-field appearance="fill" style="width: 100%">
+      <mat-label>Data de conclusão</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        formControlName="dataConclusao"
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+      <mat-error
+        *ngIf="formCurso.get('dataConclusao')?.hasError('required')"
+      >
+        Obrigatório
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Descrição -->
+    <mat-form-field appearance="fill" style="width: 100%">
+      <mat-label>Descrição</mat-label>
+      <textarea matInput rows="2" formControlName="descricao"></textarea>
+      <mat-error *ngIf="formCurso.get('descricao')?.hasError('required')">
+        Obrigatório
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Grau -->
+    <mat-form-field appearance="fill" style="width: 100%">
+      <mat-label>Grau</mat-label>
+      <input matInput formControlName="grau" />
+      <mat-error *ngIf="formCurso.get('grau')?.hasError('required')">
+        Obrigatório
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Local -->
+    <mat-form-field appearance="fill" style="width: 100%">
+      <mat-label>Local</mat-label>
+      <input matInput formControlName="local" />
+      <mat-error *ngIf="formCurso.get('local')?.hasError('required')">
+        Obrigatório
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Menção -->
+    <mat-form-field appearance="fill" style="width: 100%">
+      <mat-label>Menção</mat-label>
+      <input matInput formControlName="mencao" />
+      <mat-error *ngIf="formCurso.get('mencao')?.hasError('required')">
+        Obrigatório
+      </mat-error>
+    </mat-form-field>
+  </div>
+
+  <div mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="fechar()">Cancelar</button>
+    <button mat-raised-button color="primary" type="submit">
+      Salvar
+    </button>
+  </div>
+</form>

@@ -1,62 +1,45 @@
 <div class="container mt-4">
-  <!-- Editar Curso -->
-  <div *ngIf="editingCourse" class="card mb-4" style="width: 100%">
-    <div class="card-header">
-      <h5 class="mb-0">Editar NCE</h5>
-    </div>
-    <div class="card-body">
-      <div class="form-group">
-        <label>Nº Ord</label>
-        <input
-          id="editCourseName"
-          [(ngModel)]="editingCourse.nceId"
-          class="form-control"
-          disabled="true"
-        />
-        <label>Posto/Perfil</label>
-        <select
-          class="form-control select"
-          [(ngModel)]="editingCourse.posto"
-        >
-        <option *ngFor="let posto of postos" [value]="posto"
-        >{{posto}}</option
-      >
-        </select>
-        <label for="editCourseName">Conhecimento Específico</label>
-        <input
-          id="editCourseName"
-          [(ngModel)]="editingCourse.conhecimentoEspacifico"
-          class="form-control"
-          placeholder="Digite o novo nome do curso"
-        />
-        <label for="editCourseName">Aplicação/PAC</label>
-        <input
-          id="editCourseName"
-          [(ngModel)]="editingCourse.aplicacaoPac"
-          class="form-control"
-          placeholder="Digite o novo nome do curso"
-        />
-      </div>
-      <button
-        class="btn btn-success mt-2"
-        (click)="updateCourse()"
-        style="margin-right: 5px"
-      >
-        Atualizar Curso
-      </button>
-      <button class="btn btn-secondary mt-2" (click)="editingCourse = null">
-        Cancelar
-      </button>
-    </div>
-  </div>
-
-  <div *ngIf="courses.length" class="card">
+  <div class="card">
     <div class="card-header">
       <h5 class="mb-0">Lista de NCE's</h5>
+      <div
+        class="d-flex justify-content-end mb-2"
+        style="
+          position: absolute;
+          top: 0;
+          right: 0;
+          margin-top: 10px;
+          margin-right: 10px;
+        "
+      >
+        <button class="btn" (click)="gerarRelatorioPrioridades()">
+          <i class="fas fa-file-pdf"></i> Relatório de Prioridades
+        </button>
+      </div>
     </div>
 
+    <mat-form-field
+      appearance="outline"
+      class="w-25 me-3"
+      style="margin-top: 10px; margin-left: 20px; margin-bottom: -30px"
+    >
+      <mat-label>Ano de Capacitação</mat-label>
+      <mat-select
+        [(value)]="selectedAnoCapacitacao"
+        (selectionChange)="applyAnoCapacitacaoFilter()"
+      >
+        <mat-option *ngFor="let ano of anosCapacitacao" [value]="ano">
+          {{ ano }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <div class="card-body">
-      <div class="table-container">
+      <!-- Mensagem quando não há cursos -->
+      <div *ngIf="!courses.length" class="alert alert-info mt-4">
+        Nenhum curso disponível para o ano de capacitação selecionado.
+      </div>
+      <div *ngIf="courses.length" class="table-container">
         <table width="100%">
           <thead>
             <tr>
@@ -70,16 +53,21 @@
               <!-- <th>Reordenar</th> -->
             </tr>
           </thead>
-          <tbody cdkDropList
-          (cdkDropListDropped)="drop($event)"
-          [cdkDropListData]="courses">
-            <tr *ngFor="let course of courses; let i = index" cdkDrag
-            [cdkDragData]="course">
+          <tbody
+            cdkDropList
+            (cdkDropListDropped)="drop($event)"
+            [cdkDropListData]="dataSource.data"
+          >
+            <tr
+              *ngFor="let course of dataSource.data; let i = index"
+              cdkDrag
+              [cdkDragData]="course"
+            >
               <td style="text-align: center">
-                {{ course.nceId }}
+                {{ course.prioridade || "-" }}
               </td>
               <td style="text-align: center">
-                {{ course.posto }}
+                {{ course.posto.descricao }}
               </td>
               <td class="limitarTd">
                 {{ course.conhecimentoEspacifico }}
@@ -92,21 +80,31 @@
               </td>
               <td style="text-align: center; padding: 2px">
                 <div
-                  *ngIf="userRoles.includes('ROLE_BASIC') || userRoles.includes('ROLE_ADMIN')"
+                  *ngIf="
+                    userRoles.includes('ROLE_BASIC') ||
+                    userRoles.includes('ROLE_ADMIN')
+                  "
                   class="btn-group"
                   role="group"
                   aria-label="Button group with nested dropdown"
                 >
                   <button
-                  *ngIf="(userRoles.includes('ROLE_BASIC') || userRoles.includes('ROLE_ADMIN')) && course.status == null"
+                    *ngIf="
+                      userRoles.includes('ROLE_BASIC') &&
+                      course.statusNce === 'CRIADA'
+                    "
                     type="button"
                     class="btn btn-success"
-                    (click)="editCourse(course)"
+                    (click)="despacharCourse(course)"
                   >
-                    <i class="far fa-edit"></i> Editar
+                    <i class="far fa-envelope"></i> Despachar
                   </button>
                   <button
-                  *ngIf="(userRoles.includes('ROLE_BASIC') || userRoles.includes('ROLE_ADMIN')) && course.status == null"
+                    *ngIf="
+                      (userRoles.includes('ROLE_BASIC') ||
+                        userRoles.includes('ROLE_ADMIN')) &&
+                      course.statusNce === 'CRIADA'
+                    "
                     type="button"
                     class="btn btn-danger"
                     (click)="confirmDelete(course.nceId)"
@@ -131,31 +129,39 @@
                     >
                       <li>
                         <a
+                          *ngIf="course.statusNce === 'LIBERADO_CANDIDATO'"
                           class="dropdown-item"
                           (click)="openAddCandidateModal(course.nceId)"
                           >Incluir Candidato</a
                         >
                       </li>
                       <li *ngIf="userRoles.includes('ROLE_ADMIN')">
-                        <a class="dropdown-item" (click)="openUploadModal(course.nceId)"
+                        <a
+                          class="dropdown-item"
+                          (click)="openUploadModal(course.nceId)"
                           >Anexar documentos</a
                         >
                       </li>
-                      <li><hr class="dropdown-divider" /></li>
+                      <li *ngIf="userRoles.includes('ROLE_ADMIN')"><hr class="dropdown-divider" /></li>
                       <li>
-                        <a class="dropdown-item" (click)="viewNce(course.nceId)">Visualizar NCE</a>
+                        <a class="dropdown-item" (click)="viewNce(course.nceId)"
+                          >Visualizar NCE</a
+                        >
                       </li>
                     </ul>
                   </div>
                 </div>
                 <div
-                  *ngIf="userRoles.includes('ROLE_APROVADOR')"
+                  *ngIf="
+                    !userRoles.includes('ROLE_BASIC') &&
+                    !userRoles.includes('ROLE_ADMIN')
+                  "
                   class="btn-group"
                   role="group"
                   aria-label="Button group with nested dropdown"
                 >
                   <button
-                  *ngIf="course.status == null"
+                    *ngIf="course.status == null"
                     type="button"
                     class="btn btn-success"
                     (click)="aprovarNce(course)"
@@ -163,15 +169,15 @@
                     Aprovar
                   </button>
                   <button
-                  *ngIf="course.status == null"
+                    *ngIf="course.status == null"
                     type="button"
                     class="btn btn-danger"
-                    
+                    (click)="reprovarNce(course)"
                   >
                     Reprovar
                   </button>
                   <button
-                  *ngIf="course.status == null"
+                    *ngIf="course.status == null"
                     type="button"
                     class="btn btn-warning"
                     (click)="viewNce(course.nceId)"
@@ -181,12 +187,20 @@
                 </div>
               </td>
               <td>
-                {{ course.statusNce }}
-                <span *ngIf="course.statusNce == null">Em Análise</span>
+                <div class="timeline-dots">
+                  <div
+                    *ngFor="let step of statusSteps; let idx = index"
+                    class="dot"
+                    [class.active]="idx <= getStatusIndex(course.statusNce)"
+                    [class.rejected]="
+                      idx === getStatusIndex(course.statusNce) &&
+                      (course.statusNce?.startsWith('INDEFERIDO') ||
+                        course.statusNce?.startsWith('REPROVADO'))
+                    "
+                    matTooltip="{{ statusLabels[step] || step }}"
+                  ></div>
+                </div>
               </td>
-              <!-- <td>
-                <i class="fas fa-sort-alt"></i> Ord          
-              </td> -->
             </tr>
           </tbody>
         </table>
@@ -198,11 +212,6 @@
         showFirstLastButtons
       ></mat-paginator>
     </div>
-  </div>
-
-  <!-- Mensagem quando não há cursos -->
-  <div *ngIf="!courses.length" class="alert alert-info mt-4">
-    Nenhum curso disponível.
   </div>
 </div>
 
@@ -266,7 +275,11 @@
         >
           Fechar
         </button>
-        <button type="button" class="btn btn-primary" (click)="uploadFile(nceId)">
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="uploadFile(nceId)"
+        >
           Enviar
         </button>
       </div>

@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 
 }) export class NceService { 
-    private baseUrl = 'http://localhost:8080/nces'; // URL da API para buscar NCEs
+    private baseUrl = 'https://localhost:8080/nces'; // URL da API para buscar NCEs
 
     constructor(private http: HttpClient, private authService: AuthService) {}
     
@@ -16,7 +16,7 @@ import { AuthService } from './auth.service';
     getNceById(nceId: string): Observable<any> { 
       const token = localStorage.getItem('authToken');
       const headers = { Authorization: `Bearer ${token}` };
-      return this.http.get<any[]>(`${this.baseUrl}/${nceId}`, { headers });
+      return this.http.get<any[]>(`${this.baseUrl}/${nceId}`, { headers, withCredentials: true });
     } 
 
     // Atualizar uma NCE
@@ -27,7 +27,7 @@ import { AuthService } from './auth.service';
     status: nce.status
     // demais campos editáveis do NceRequest
   };
-  return this.http.put(`${this.baseUrl}/${nce.id}`, payload);
+  return this.http.put(`${this.baseUrl}/${nce.id}`, payload, { withCredentials: true });
 }
 
   // Busca o usuário logado
@@ -35,19 +35,14 @@ import { AuthService } from './auth.service';
     const token = localStorage.getItem('authToken');
     const headers = { Authorization: `Bearer ${token}` };
 
-    return this.http.get<any>('api/login', { headers });
+    return this.http.get<any>('api/login', { headers, withCredentials: true });
   }
 
   // Busca as NCEs e filtra pela Organização Militar do usuário logado
   getNcesByOrganizacaoMilitar(): Observable<any[]> {
-    return this.getUser().pipe(
-      map(user => user.organizacaoMilitar),  // Obtém a organização militar do usuário
-      switchMap(organizacaoMilitar => {
-        return this.http.get<any[]>(this.baseUrl).pipe(
-          map(nces => nces.filter(nce => nce.organizacaoMilitarResponsavel.nomeInstituicao === organizacaoMilitar)) // Filtra as NCEs
-        );
-      })
-    );
-  }
+  return this.http.get<any[]>(this.baseUrl, {withCredentials: true});
+}
+
+
 
 }

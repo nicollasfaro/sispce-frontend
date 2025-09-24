@@ -1,77 +1,77 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" routerLink="/courses">
+<mat-toolbar color="primary">
+  <!-- Logo -->
+  <button mat-button routerLink="/courses" class="logo-btn">
     <img src="/logo.png" alt="SisPCE" height="40" />
-  </a>
-  <button
-    class="navbar-toggler"
-    type="button"
-    data-toggle="collapse"
-    data-target="#navbarNav"
-    aria-controls="navbarNav"
-    aria-expanded="false"
-    aria-label="Toggle navigation"
-  >
-    <span class="navbar-toggler-icon"></span>
   </button>
-  <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav ml-auto">
-      <li
-        class="nav-item"
-        *ngIf="
-          isLoggedIn &&
-          (userRoles.includes('ROLE_ADMIN') || userRoles.includes('ROLE_BASIC'))
-        "
+
+  
+
+  <!-- Menu suspenso de NCE -->
+  <ng-container *ngIf="isLoggedIn">
+    <button mat-button [matMenuTriggerFor]="nceMenu">Menu NCE</button>
+    <mat-menu #nceMenu="matMenu">
+      <button
+        mat-menu-item
+        *ngIf="userRoles.includes('ROLE_ADMIN') || userRoles.includes('ROLE_BASIC')"
+        routerLink="/courses"
       >
-        <a class="nav-link" routerLink="/courses">Adcionar NCE</a>
-      </li>
-      <li class="nav-item" *ngIf="isLoggedIn">
-        <a class="nav-link" routerLink="/listaNce">Lista de NCE's</a>
-      </li>
-      <li
-        class="nav-item"
-        *ngIf="isLoggedIn && userRoles.includes('ROLE_ADMIN')"
-      >
-        <a class="nav-link" routerLink="/cadastroCandidato"
-          >Cadastro de Candidato</a
-        >
-      </li>
-      <li
-        class="nav-item"
-        *ngIf="isLoggedIn && userRoles.includes('ROLE_ADMIN')"
-      >
-        <a class="nav-link" routerLink="/cadastroUsuario">Usuários</a>
-      </li>
-      <li
-        class="nav-item"
-        *ngIf="isLoggedIn"
-        style="position: absolute; right: 150px; margin-right: 10px"
-      >
-        <span class="navbar-text">
-          {{ username }}
-        </span>
-      </li>
-      <li
-        class="nav-item"
-        *ngIf="isLoggedIn"
-        style="position: absolute; right: 0; margin-right: 10px"
-      >
-        <button class="btn btn-outline-danger" (click)="logout()">Sair</button>
-      </li>
-      <li
-        class="nav-item"
-        style="position: absolute; right: 0; margin-right: 80px"
-      >
-        <div class="theme-toggle">
-          <input type="checkbox" id="theme-switch" (click)="toggleTheme()" />
-          <label for="theme-switch" class="theme-switch-label">
-            <div class="sun-moon">
-              <div class="sun"></div>
-              <div class="moon"></div>
-            </div>
-            <div class="toggle-circle"></div>
-          </label>
-        </div>
-      </li>
-    </ul>
+        Adicionar NCE
+      </button>
+      <button mat-menu-item routerLink="/listaNce">Lista de NCE's</button>
+    </mat-menu>
+  </ng-container>
+
+  <!-- Menu suspenso de Administração -->
+  <ng-container *ngIf="isLoggedIn && userRoles.includes('ROLE_ADMIN')">
+    <button mat-button [matMenuTriggerFor]="adminMenu">Administração</button>
+    <mat-menu #adminMenu="matMenu">
+      <button mat-menu-item routerLink="/candidatos">Candidatos</button>
+      <button mat-menu-item routerLink="/cadastroUsuario">Usuários</button>
+    </mat-menu>
+  </ng-container>
+
+  <div *ngIf="isLoggedIn && userRoles.includes('ROLE_ADMIN')" class="ms-auto">
+    <button mat-icon-button [matBadge]="pendentesCount" matBadgeColor="warn"
+            (click)="abrirModalSolicitacoes()">
+      <mat-icon>notifications</mat-icon>
+    </button>
   </div>
-</nav>
+
+  <!-- Espaço para empurrar o resto pro lado direito -->
+  <span class="spacer"></span>
+
+  <!-- Usuário Logado -->
+  <div *ngIf="isLoggedIn" class="user-info">
+    <p class="username">Usuário: {{ username }}</p>
+    <p class="role">
+      Nível de acesso:
+      <span [ngSwitch]="userRoles[0]">
+        <span *ngSwitchCase="'ROLE_BASIC'">Criador</span>
+        <span *ngSwitchCase="'ROLE_ADMIN'">Administrador</span>
+        <span *ngSwitchCase="'ROLE_APROVADOR'">Aprovador</span>
+        <span *ngSwitchCase="'ROLE_CADESM'">CADESM</span>
+        <span *ngSwitchCase="'ROLE_DIRETORIA'">Diretoria</span>
+        <span *ngSwitchCase="'ROLE_CMT'">Comandante</span>
+        <span *ngSwitchCase="'ROLE_EME'">EME</span>
+        <span *ngSwitchDefault>Usuário</span>
+      </span>
+      <span>⏳ Sessão expira em: {{ formatTime(remainingTime) }} </span>
+    </p>
+  </div>
+
+  <!-- Botões à direita -->
+  <div class="actions">
+    <!-- Toggle Tema -->
+    <mat-slide-toggle (change)="toggleTheme()">🌞🌙</mat-slide-toggle>
+
+    <!-- Logout -->
+    <button
+      mat-stroked-button
+      color="warn"
+      *ngIf="isLoggedIn"
+      (click)="logout()"
+    >
+      Sair
+    </button>
+  </div>
+</mat-toolbar>

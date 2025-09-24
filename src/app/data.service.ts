@@ -3,60 +3,56 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable, switchMap } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DataService {
   private baseUrl = 'http://localhost:3000';
   constructor(private http: HttpClient) {}
 
   getCandidates(): Observable<any[]> {
-    return this.http.get<any[]>('/api/candidatos').pipe(
+    return this.http
+      .get<any[]>('/api/candidatos', { withCredentials: true })
+      .pipe(
         map((data: any) => {
           console.log('Received candidatos:', data);
-          return Array.isArray(data) ? data : [];  // Garantir que seja um array
+          return Array.isArray(data) ? data : []; // Garantir que seja um array
         })
       );
   }
 
-  getNCEs(): Observable<any[]> {
-    const token = localStorage.getItem('authToken');
-  const headers = { Authorization: `Bearer ${token}` };
+  getNCEs(ano?: number): Observable<any[]> {
+    let url = '/api/nces';
+    if (ano) {
+      url += `?ano=${ano}`;
+    }
 
-  return this.http.get('/api/nces', { headers, responseType: 'text' }).pipe(
-    map(response => {
-      try {
-        return JSON.parse(response); // Faz parse manualmente
-      } catch (error) {
-        console.error("Erro ao converter JSON:", error);
-        return [];
-      }
-    })
-  );
+    return this.http.get<any[]>(url, { withCredentials: true });
   }
 
   getOms(): Observable<any> {
-    const token = localStorage.getItem('authToken');
-    const headers = { Authorization: `Bearer ${token}` };
-    return this.http.get<any[]> ('/api/oms', {headers});
+    return this.http.get<any[]>('/api/oms', { withCredentials: true });
   }
 
   getUser(): Observable<any> {
-    const token = localStorage.getItem('authToken');
-    const headers = { Authorization: `Bearer ${token}` };
-
-    return this.http.get<any>('/api/users', { headers });
+    return this.http.get<any>('/api/users', { withCredentials: true });
   }
   deleteUser(userId: string): Observable<any> {
-    return this.http.delete(`'/api/users'/${userId}`);
+    return this.http.delete(`'/api/users'/${userId}`, { withCredentials: true });
   }
 
   // Busca as NCEs e filtra pela Organização Militar do usuário logado
   getNcesByOrganizacaoMilitar(): Observable<any[]> {
     return this.getUser().pipe(
-      map(user => user.organizacaoMilitar.nomeInstituicao),  // Obtém a organização militar do usuário
-      switchMap(organizacaoMilitar => {
-        return this.http.get<any[]>('/api/nces').pipe(
-          map(nces => nces.filter(nce => nce.organizacaoMilitarResponsavel.nomeInstituicao === organizacaoMilitar)) // Filtra as NCEs
+      map((user) => user.organizacaoMilitar.nomeInstituicao), // Obtém a organização militar do usuário
+      switchMap((organizacaoMilitar) => {
+        return this.http.get<any[]>('/api/nces' , { withCredentials: true }).pipe(
+          map((nces) =>
+            nces.filter(
+              (nce) =>
+                nce.organizacaoMilitarResponsavel.nomeInstituicao ===
+                organizacaoMilitar
+            )
+          ) // Filtra as NCEs
         );
       })
     );
@@ -65,44 +61,71 @@ export class DataService {
   getPostos(): Observable<any[]> {
     const token = localStorage.getItem('authToken');
     const headers = { Authorization: `Bearer ${token}` };
-    return this.http.get<any[]>('/api/nces/postos', { headers });
+    return this.http.get<any[]>('/api/postos', {
+      headers,
+      withCredentials: true,
+    });
   }
 
   getStatusNCE(): Observable<any[]> {
     const token = localStorage.getItem('authToken');
     const headers = { Authorization: `Bearer ${token}` };
-    return this.http.get<any[]>('/api/nces/status', { headers });
+    return this.http.get<any[]>('/api/nces/status', {
+      headers,
+      withCredentials: true,
+    });
   }
 
-  getCandidatosParaNce(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/candidatosParaNce`)
+  // Lista todos os candidatos
+  getCandidatos(): Observable<any[]> {
+    return this.http.get<any[]>('/api/candidato', { withCredentials: true });
   }
 
-  getCandidatos2(): Observable<any[]> {
-    return this.http.get<any[]>('/api/');
+  // Cadastra novo candidato
+  addCandidate(candidato: any): Observable<any> {
+    return this.http.post('/api/candidato', candidato, {
+      withCredentials: true,
+    });
   }
 
-  addCandidato(candidatoData: any, cursosData: any): Observable<any> {
-    return this.http.post<any>('/api/', candidatoData, cursosData);
+  // Vincula candidato existente a um NCE
+  incluirCandidatoNaNce(nceId: number, candidatoId: number): Observable<any> {
+    return this.http.post(`/api/candidato/${nceId}/vincular/${candidatoId}`, {
+      withCredentials: true,
+    });
+  }
+
+  // Carrega candidatos de uma NCE específica
+  getCandidatosParaNce(nceId: string): Observable<any[]> {
+    return this.http.get<any[]>(`/api/candidato/nce/${nceId}`, {
+      withCredentials: true,
+    });
   }
 
   updateCandidato(candidato: any): Observable<any> {
-    return this.http.put<any>(`'/api/'/${candidato.id}`, candidato);
+    return this.http.put<any>(`'/api/'/${candidato.id}`, candidato, {
+      withCredentials: true,
+    });
   }
 
-  deleteCandidato(id: number): Observable<any> {
-    return this.http.delete<any>(`'/api/'/candidatosParaNce/${id}`);
-  }
-
-  // Função para adicionar candidato à NCE
-  addCandidateToNce(candidatoData: any): Observable<any> {
-    return this.http.post(`'/api/'/candidatosParaNce`, candidatoData);
+  deleteCandidatoDaNce(nceId: string, candidatoId: number): Observable<any> {
+    return this.http.delete(
+      `/api/candidato/${nceId}/desvincular/${candidatoId}`,
+      { withCredentials: true }
+    );
   }
 
   getAttachments(nceId: string): Observable<any[]> {
     const token = localStorage.getItem('authToken');
     const headers = { Authorization: `Bearer ${token}` };
 
-    return this.http.get<any[]>(`/api/nces/${nceId}/attachments`, { headers });
-}
+    return this.http.get<any[]>(`/api/nces/${nceId}/attachments`, {
+      headers,
+      withCredentials: true,
+    });
+  }
+
+  getAnosCapacitacao(): Observable<number[]> {
+    return this.http.get<number[]>('/api/nces/anos', { withCredentials: true });
+  }
 }

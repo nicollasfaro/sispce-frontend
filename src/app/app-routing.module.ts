@@ -12,9 +12,15 @@ import { RoleGuard } from './role.guard';
 import { NaoAutorizadoComponent } from './nao-autorizado/nao-autorizado.component';
 import { CadastroUsuarioComponent } from './cadastro-usuario/cadastro-usuario.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
+import { AdminGuard } from './admin.guard';
+import { CandidatosComponent } from './candidatos/candidatos.component';
+import { CandidatoVisualizarComponent } from './candidato-visualizar/candidato-visualizar.component';
+import { CandidatoEditarComponent } from './candidato-editar/candidato-editar.component';
+import { LoginSuccessComponent } from './login-success/login-success.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
+  { path: 'auth/success', component: LoginSuccessComponent },
   {
     path: 'courses',
     component: CoursesComponent,
@@ -25,7 +31,7 @@ const routes: Routes = [
     path: 'listaNce',
     component: ListaNceComponent,
     canActivate: [RoleGuard],
-    data: { roles: ['ROLE_ADMIN', 'ROLE_BASIC', 'ROLE_APROVADOR'] },
+    data: { roles: ['ROLE_ADMIN', 'ROLE_BASIC', 'ROLE_APROVADOR', 'ROLE_CMT', 'ROLE_EME', 'ROLE_DIRETORIA', 'ROLE_CADESM'] },
   },
   {
     path: 'change-password',
@@ -46,14 +52,36 @@ const routes: Routes = [
     data: { roles: ['ROLE_ADMIN'] },
   },
   {
+    path: 'candidatos',
+    component: CandidatosComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['ROLE_ADMIN'] },
+  },
+  {
+    path: 'candidatos/:id',
+    component: CandidatoVisualizarComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['ROLE_ADMIN'] },
+  },
+  {
+    path: 'candidatos/editar/:id',
+    component: CandidatoEditarComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['ROLE_ADMIN'] },
+  },
+
+  { path: 'acesso-negado', component: NaoAutorizadoComponent },
+  {
     path: 'nce/:id',
     component: VisualizarNceComponent,
-    canActivate: [AuthGuard],
+    canActivate: [RoleGuard],
+    data: { roles: ['ROLE_ADMIN', 'ROLE_BASIC', 'ROLE_APROVADOR', 'ROLE_CMT', 'ROLE_EME', 'ROLE_DIRETORIA', 'ROLE_CADESM'] },
   },
   {
     path: 'nce/edit/:id',
     component: EditarNceComponent,
-    canActivate: [AuthGuard],
+    canActivate: [RoleGuard],
+    data: { roles: ['ROLE_ADMIN', 'ROLE_BASIC', 'ROLE_APROVADOR', 'ROLE_CMT', 'ROLE_EME', 'ROLE_DIRETORIA', 'ROLE_CADESM'] },
   },
   // { path: 'teste', component: CursosCandidatoTabelaComponent, canActivate: [AuthGuard] },
   { path: '', redirectTo: '/login', pathMatch: 'full' },

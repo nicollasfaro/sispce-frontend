@@ -2,69 +2,67 @@
   <mat-tab label="Posto/Perfil">
     <div style="display: grid; margin-top: 10px">
       <mat-form-field>
-        <mat-label>Posto compátivel à ocupação do cargo</mat-label>
-        <mat-select [(ngModel)]="courseData.postoCompativelOcupacaoCargo" required>
-          <mat-option value="Of L Ens Mil Bélico"
-            >Of L Ens Mil Bélico</mat-option
-          >
-          <mat-option value="Of L Ens Mil Sau">Of L Ens Mil Sau</mat-option>
-          <mat-option value="Of L Ens Mil Complementar"
-            >Of L Ens Mil Complementar</mat-option
-          >
-          <mat-option value="Of L Ens Mil Científico-Tecnológico"
-            >Of L Ens Mil Científico-Tecnológico</mat-option
-          >
-        </mat-select>
-        <mat-error *ngIf="courseForm.get('postoCompativelOcupacaoCargo')?.hasError('required')">
-          Campo é obrigatório
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>Posto/Graduação</mat-label>
-        <mat-select [(ngModel)]="courseData.posto" required>
-          <mat-option *ngFor="let posto of postos" [value]="posto"
-            >{{posto}}</mat-option
-          >
-          
-        </mat-select>
-        <mat-error
-          *ngIf="courseForm.get('posto')?.hasError('required')"
-        >
-          Campo é obrigatório
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field class="example-full-width">
-        <mat-label>Especialidade</mat-label>
-        <textarea
-          matInput
-          placeholder=""
-          [(ngModel)]="courseData.especialidade"
-          required
-          maxlength="280"
-          (input)="(280 - courseData.especialidade.length)"
-        ></textarea>
-        <mat-error
-          *ngIf="courseForm.get('especialidade')?.hasError('required')"
-        >
-          Campo é obrigatório
-        </mat-error>
-        <mat-hint align="end"
-          >{{ 280 - courseData.especialidade.length }} caracteres
-          restantes</mat-hint
-        >
-      </mat-form-field>
-      <mat-form-field>
         <mat-label>QCP</mat-label>
         <input
           matInput
           [(ngModel)]="courseData.qcp"
+          (ngModelChange)="onQcpChange($event)"
+          (input)="courseData.qcp = (courseData.qcp || '').toUpperCase()"
           required
-          mask="99.9999.999.999"
+          mask="AA.AAAA.AAA.AAA"
+          [dropSpecialCharacters]="false"
+          placeholder="00.0000.000.000"
         />
         <mat-error *ngIf="courseForm.get('qcp')?.hasError('required')">
           QCP é obrigatório
         </mat-error>
       </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Posto compatível à ocupação do cargo</mat-label>
+        <input
+          matInput
+          [(ngModel)]="courseData.postoCompativelOcupacaoCargo"
+          [readonly]="true"
+          [disabled]="true"
+          placeholder="Preenchido automaticamente pelo QCP"
+        />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Posto/Graduação</mat-label>
+        <mat-select
+          [(ngModel)]="courseData.posto"
+          name="posto"
+          [disabled]="true"
+        >
+          <mat-option [value]="courseData.posto">
+            {{ courseData.posto?.descricao }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="example-full-width">
+        <mat-label>Especialidade</mat-label>
+        <input
+          matInput
+          [(ngModel)]="courseData.especialidade"
+          [readonly]="true"
+          [disabled]="true"
+          placeholder="Preenchido automaticamente pelo QCP"
+        />
+      </mat-form-field>
+      <!-- Novo campo: Nível do curso -->
+      <div style="margin-top: 15px">
+        <label class="mat-label">Nível do Curso</label>
+        <mat-radio-group
+          [(ngModel)]="courseData.nivelEnsino"
+          name="nivelEnsino"
+          style="display: flex; gap: 20px; margin-top: 5px"
+        >
+          <mat-radio-button value="M">M - Mestrado</mat-radio-button>
+          <mat-radio-button value="D">D - Doutorado</mat-radio-button>
+          <mat-radio-button value="PD">PD - Pós-doutorado</mat-radio-button>
+        </mat-radio-group>
+      </div>
     </div>
   </mat-tab>
   <mat-tab label="Conhecimento Específico">
@@ -103,9 +101,7 @@
           maxlength="280"
           (input)="(280 - courseData.aplicacaoPac.length)"
         ></textarea>
-        <mat-error
-          *ngIf="courseForm.get('aplicacaoPac')?.hasError('required')"
-        >
+        <mat-error *ngIf="courseForm.get('aplicacaoPac')?.hasError('required')">
           Campo é obrigatório
         </mat-error>
         <mat-hint align="end"
@@ -129,7 +125,9 @@
             type="number"
             required
           />
-          <mat-error *ngIf="courseForm.get('duracaoAnos')?.hasError('required')">
+          <mat-error
+            *ngIf="courseForm.get('duracaoAnos')?.hasError('required')"
+          >
             Campo é obrigatório
           </mat-error>
         </mat-form-field>
@@ -139,11 +137,7 @@
             matInput
             [(ngModel)]="courseData.observacao"
             placeholder=""
-            required
           />
-          <mat-error *ngIf="courseForm.get('observacao')?.hasError('required')">
-            Campo é obrigatório
-          </mat-error>
         </mat-form-field>
       </div>
     </div>
@@ -163,11 +157,7 @@
       </mat-form-field>
       <mat-form-field appearance="fill">
         <mat-label>IES</mat-label>
-        <mat-select [(ngModel)]="courseData.ies" required>
-          <mat-option value="UFG Faculdade de Informação e Comunicação"
-            >UFG Faculdade de Informação e Comunicação</mat-option
-          >
-        </mat-select>
+        <input matInput [(ngModel)]="courseData.ies" placeholder="" required />
         <mat-error *ngIf="courseForm.get('ies')?.hasError('required')">
           Campo é obrigatório
         </mat-error>
@@ -229,24 +219,18 @@
           placeholder="Indicar em qual programa de pós-graduação, a área de concentração e linha de pesquisa da IES."
           required
           maxlength="280"
-          (input)="
-            (280 - courseData.programaConcentacaoPesquisa.length)
-          "
+          (input)="(280 - courseData.programaConcentacaoPesquisa.length)"
         ></textarea>
         <mat-error
           *ngIf="
-            courseForm
-              .get('programaConcentacaoPesquisa')
-              ?.hasError('required')
+            courseForm.get('programaConcentacaoPesquisa')?.hasError('required')
           "
         >
           Campo é obrigatório
         </mat-error>
         <mat-hint align="end"
-          >{{
-            280 - courseData.programaConcentacaoPesquisa.length
-          }}
-          caracteres restantes</mat-hint
+          >{{ 280 - courseData.programaConcentacaoPesquisa.length }} caracteres
+          restantes</mat-hint
         >
       </mat-form-field>
     </div>
@@ -255,12 +239,12 @@
     <div style="display: grid; margin-top: 10px">
       <mat-form-field appearance="fill">
         <mat-label>Objetivo Estratégico</mat-label>
-        <mat-select [(ngModel)]="courseData.objetivoEstrategico" required>
-          <mat-option value="IES de Força Armada"
-            >IES de Força Armada</mat-option
-          >
-          <mat-option value="OEE 5">OEE 5</mat-option>
-        </mat-select>
+        <input
+          matInput
+          [(ngModel)]="courseData.objetivoEstrategico"
+          placeholder=""
+          required
+        />
         <mat-error
           *ngIf="courseForm.get('objetivoEstrategico')?.hasError('required')"
         >
@@ -269,12 +253,12 @@
       </mat-form-field>
       <mat-form-field appearance="fill">
         <mat-label>Estratégia</mat-label>
-        <mat-select [(ngModel)]="courseData.estrategia" required>
-          <mat-option value="5.2"
-            >5.2 - Aperfeiçoamento do Preparo da Força Terrestre</mat-option
-          >
-          <mat-option value="OEE 5">OEE 5</mat-option>
-        </mat-select>
+        <input
+          matInput
+          [(ngModel)]="courseData.estrategia"
+          placeholder=""
+          required
+        />
         <mat-error *ngIf="courseForm.get('estrategia')?.hasError('required')">
           Campo é obrigatório
         </mat-error>
@@ -299,14 +283,11 @@
     <div style="display: grid; margin-top: 10px">
       <mat-form-field appearance="fill">
         <mat-label>Organização Militar</mat-label>
-        <mat-select [(ngModel)]="courseData.organizacaoMilitar" required>
-          <mat-option *ngFor="let om of oms" [value]="om"
-            >{{om.nomeInstituicao}}</mat-option
-          >
-        </mat-select>
-        <mat-error *ngIf="courseForm.get('organizacaoMilitar')?.hasError('required')">
-          Campo é obrigatório
-        </mat-error>
+        <input
+          matInput
+          [value]="courseData.organizacaoMilitar?.omId"
+          disabled
+        />
       </mat-form-field>
     </div>
   </mat-tab>
@@ -322,11 +303,13 @@
         <mat-form-field style="width: 25%">
           <mat-label>Posto/Graduação</mat-label>
           <mat-select [(ngModel)]="courseData.postoResponsavel" required>
-            <mat-option *ngFor="let posto of postos" [value]="posto"
-            >{{posto}}</mat-option
-          >
+            <mat-option *ngFor="let posto of postos" [value]="posto">{{
+              posto.descricao
+            }}</mat-option>
           </mat-select>
-          <mat-error *ngIf="courseForm.get('postoResponsavel')?.hasError('required')">
+          <mat-error
+            *ngIf="courseForm.get('postoResponsavel')?.hasError('required')"
+          >
             Campo é obrigatório
           </mat-error>
         </mat-form-field>
@@ -392,24 +375,22 @@
             Campo é obrigatório
           </mat-error>
         </mat-form-field>
-        
-          <mat-form-field appearance="fill" style="width: 30%">
-            <mat-label>Email</mat-label>
-            <input
-              matInput
-              [(ngModel)]="courseData.mail"
-              (input)="onEmailInput()"
-              (keydown)="onEmailKeydown($event)"
-              placeholder="Insira seu email"
-              required
-            />
-            <mat-error *ngIf="courseForm.get('mail')?.hasError('required')">
-              Campo é obrigatório
-            </mat-error>
-          </mat-form-field>
-        
-          
-        
+
+        <mat-form-field appearance="fill" style="width: 30%">
+          <mat-label>Email</mat-label>
+          <input
+            matInput
+            [(ngModel)]="courseData.mail"
+            (input)="onEmailInput()"
+            (keydown)="onEmailKeydown($event)"
+            placeholder="Insira seu email"
+            required
+          />
+          <mat-error *ngIf="courseForm.get('mail')?.hasError('required')">
+            Campo é obrigatório
+          </mat-error>
+        </mat-form-field>
+
         <!-- <mat-form-field appearance="fill" style="width: 30%">
           <mat-label>E-mail</mat-label>
           <input
@@ -435,12 +416,21 @@
       </div>
       <mat-form-field appearance="fill">
         <mat-label>Organização Militar</mat-label>
-        <mat-select [(ngModel)]="courseData.organizacaoMilitarResponsavel" required>
-          <mat-option *ngFor="let om of oms" [value]="om"
-            >{{om.nomeInstituicao}}</mat-option
-          >
+        <mat-select
+          [(ngModel)]="courseData.organizacaoMilitarResponsavel"
+          required
+        >
+          <mat-option *ngFor="let om of oms" [value]="om">{{
+            om.nomeInstituicao
+          }}</mat-option>
         </mat-select>
-        <mat-error *ngIf="courseForm.get('organizacaoMilitarResponsavel')?.hasError('required')">
+        <mat-error
+          *ngIf="
+            courseForm
+              .get('organizacaoMilitarResponsavel')
+              ?.hasError('required')
+          "
+        >
           Campo é obrigatório
         </mat-error>
       </mat-form-field>
