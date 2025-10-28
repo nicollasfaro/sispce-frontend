@@ -1,34 +1,86 @@
-<div class="container mt-4">
-  <h3>Candidatos</h3>
+<div class="container mt-4" *ngIf="dataSource && dataSource.data.length > 0; else semDados">
+  <mat-card>
+    <mat-card-header style="margin-bottom: 10px;">
+      <mat-card-title>📋 Lista de Candidatos</mat-card-title>
+    </mat-card-header>
 
-  <table class="table table-striped mt-3" *ngIf="candidatos.length > 0; else semDados">
-    <thead>
-      <tr>
-        <th>Nome</th>
-        <th>Email</th>
-        <th>Posto</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let candidato of candidatos">
-        <td>{{ candidato.nome }}</td>
-        <td>{{ candidato.email }}</td>
-        <td>{{ candidato.posto }}</td>
-        <td>
-          <button class="btn btn-info btn-sm" (click)="visualizar(candidato)">Ver</button>
-          <button class="btn btn-warning btn-sm" (click)="editar(candidato)">Editar</button>
-          <button class="btn btn-danger btn-sm" (click)="excluir(candidato.id)">Excluir</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <mat-card-content>
+      <!-- Barra de pesquisa -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Pesquisar candidato</mat-label>
+        <input
+          matInput
+          (keyup)="applyFilter($event)"
+          placeholder="Digite nome, email ou posto"
+        />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
 
-  <ng-template #semDados>
-    <p>Nenhum candidato encontrado.</p>
-  </ng-template>
+      <!-- Tabela -->
+      <div class="table-responsive">
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 full-width-table">
+
+          <!-- Nome -->
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef> Nome </th>
+            <td mat-cell *matCellDef="let candidato"> {{ candidato.nome }} </td>
+          </ng-container>
+
+          <!-- Email -->
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef> Email </th>
+            <td mat-cell *matCellDef="let candidato"> {{ candidato.email }} </td>
+          </ng-container>
+
+          <!-- Posto -->
+          <ng-container matColumnDef="posto">
+            <th mat-header-cell *matHeaderCellDef> Posto </th>
+            <td mat-cell *matCellDef="let candidato"> {{ candidato.posto }} </td>
+          </ng-container>
+
+          <!-- Ações -->
+          <ng-container matColumnDef="acoes">
+            <th mat-header-cell *matHeaderCellDef> Ações </th>
+            <td mat-cell *matCellDef="let candidato">
+              <button mat-icon-button color="primary" (click)="visualizar(candidato)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button color="accent" (click)="editar(candidato)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="excluir(candidato.id)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <!-- Cabeçalho e linhas -->
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+
+      <!-- Paginação -->
+      <mat-paginator
+        [length]="dataSource.data.length"
+        [pageSize]="5"
+        [pageSizeOptions]="[5, 10, 20]"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
 </div>
 
+<!-- Nenhum dado -->
+<ng-template #semDados>
+  <mat-card>
+    <mat-card-content>
+      <p class="text-muted">Nenhum candidato encontrado.</p>
+    </mat-card-content>
+  </mat-card>
+</ng-template>
+
+<!-- Acesso Negado -->
 <ng-template #acessoNegado>
   <div class="alert alert-danger mt-4">
     Você não tem permissão para acessar esta página.

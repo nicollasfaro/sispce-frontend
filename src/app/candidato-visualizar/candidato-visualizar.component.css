@@ -1,0 +1,31 @@
+.candidato-card {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border-radius: 10px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.candidato-card h5 {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.candidato-card .list-group-item {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border: 1px solid #ddd;
+}
+
+.candidato-card .list-group-item strong {
+  color: var(--accent-color);
+}
+
+.card-header {
+  background: var(--primary-color);
+  color: #fff !important;
+}
+
+.dark-theme .candidato-card .list-group-item {
+  border-color: #444;
+}

@@ -1,10 +1,99 @@
 <div class="container mt-4" *ngIf="candidato">
-  <h3>Detalhes do Candidato</h3>
-  <ul class="list-group">
-    <li class="list-group-item"><strong>Nome:</strong> {{ candidato.nome }}</li>
-    <li class="list-group-item"><strong>Email:</strong> {{ candidato.email }}</li>
-    <li class="list-group-item"><strong>Celular:</strong> {{ candidato.celular }}</li>
-    <li class="list-group-item"><strong>Posto:</strong> {{ candidato.posto }}</li>
-    <li class="list-group-item"><strong>Estado Civil:</strong> {{ candidato.estadoCivil }}</li>
-  </ul>
+  <div class="card shadow-lg border-0 candidato-card">
+    <div class="card-header bg-primary text-white d-flex flex-column flex-sm-row justify-content-between align-items-center">
+      <h4 class="mb-0"><i class="fas fa-user"></i> Detalhes do Candidato</h4>
+      <button class="btn btn-light btn-sm mt-2 mt-sm-0" (click)="goBack()">
+        <i class="fas fa-arrow-left"></i> Voltar
+      </button>
+    </div>
+    <div class="card-body">
+
+      <!-- Dados Pessoais -->
+      <h5 class="mb-3"><i class="fas fa-id-card"></i> Dados Pessoais</h5>
+      <div class="row text-muted">
+        <div class="col-md-6 mb-2"><span class="fw-bold">Nome:</span> {{ candidato.nome }}</div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">Naturalidade:</span> {{ candidato.naturalidade }}</div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">Nascimento:</span> {{ candidato.dataDeNascimento | date:"dd/MM/yyyy" }}</div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">Estado Civil:</span> {{ candidato.estadoCivil }}</div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">Email:</span> {{ candidato.email }}</div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">Celular:</span> {{ candidato.celular }}</div>
+      </div>
+      <hr />
+
+      <!-- Informações Militares -->
+      <h5 class="mb-3"><i class="fas fa-shield-alt"></i> Informações Militares</h5>
+      <div class="row text-muted">
+        <div class="col-md-6 mb-2"><span class="fw-bold">Posto:</span> {{ candidato.posto }}</div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">OM:</span> {{ candidato.organizacaoMilitar?.nomeInstituicao }} ({{ candidato.organizacaoMilitar?.sigla }})</div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">CODOM:</span> {{ candidato.organizacaoMilitar?.codom }}</div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">Apresentação:</span> {{ candidato.apresentacaoOm | date:"dd/MM/yyyy" }}</div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">Inclusão:</span> {{ candidato.inclusaoOm | date:"dd/MM/yyyy" }}</div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">Última Promoção:</span> {{ candidato.ultimaPromocao | date:"dd/MM/yyyy" }}</div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">Tempo de Guarnição:</span> {{ candidato.tempoGuarnicao }} anos</div>
+      </div>
+      <hr />
+
+      <!-- Situação -->
+      <h5 class="mb-3"><i class="fas fa-check-circle"></i> Situação</h5>
+      <div class="row text-muted">
+        <div class="col-md-6 mb-2"><span class="fw-bold">Inspeção de Saúde:</span> {{ candidato.inspecaoSaude }}</div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">Movimentado:</span> <span class="badge" [ngClass]="candidato.movimentado ? 'bg-success' : 'bg-secondary'">{{ candidato.movimentado ? 'Sim' : 'Não' }}</span></div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">Sub Judice:</span> <span class="badge" [ngClass]="candidato.subJudice ? 'bg-warning' : 'bg-secondary'">{{ candidato.subJudice ? 'Sim' : 'Não' }}</span></div>
+        <div class="col-md-6 mb-2"><span class="fw-bold">Designado/Matriculado:</span> <span class="badge" [ngClass]="candidato.designadoOrMatriculado ? 'bg-success' : 'bg-secondary'">{{ candidato.designadoOrMatriculado ? 'Sim' : 'Não' }}</span></div>
+      </div>
+      <hr />
+
+      <!-- Cursos -->
+      <h5 class="mb-3"><i class="fas fa-book"></i> Cursos</h5>
+      <div *ngIf="candidato.curso?.length > 0; else noCursos">
+        <ul class="list-group list-group-flush mb-4">
+          <li class="list-group-item" *ngFor="let c of candidato.curso">
+            <i class="fas fa-graduation-cap text-primary"></i>
+            <strong>{{ c.nomeCurso }}</strong> - {{ c.local }}
+            <span class="text-muted">({{ c.dataConclusao | date:"dd/MM/yyyy" }})</span>
+          </li>
+        </ul>
+      </div>
+      <ng-template #noCursos>
+        <p class="text-muted fst-italic">Nenhum curso cadastrado</p>
+      </ng-template>
+      <hr />
+
+      <!-- NCEs -->
+      <h5 class="mb-3"><i class="fas fa-university"></i> NCEs</h5>
+      <div class="accordion" id="accordionNce">
+        <div class="accordion-item" *ngFor="let n of candidato.nce; let i = index">
+          <h2 class="accordion-header" id="heading{{i}}">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+              [attr.data-bs-target]="'#collapse'+i" aria-expanded="false" [attr.aria-controls]="'collapse'+i">
+              <i class="fas fa-file-alt me-2"></i> NCE #{{ n.nceId }} - {{ n.especialidade }}
+            </button>
+          </h2>
+          <div [id]="'collapse'+i" class="accordion-collapse collapse" [attr.aria-labelledby]="'heading'+i" data-bs-parent="#accordionNce">
+            <div class="accordion-body text-muted">
+              <p><strong>Posto Compatível:</strong> {{ n.postoCompativelOcupacaoCargo }}</p>
+              <p><strong>Posto:</strong> {{ n.posto?.descricao }}</p>
+              <p><strong>QCP:</strong> {{ n.qcp }}</p>
+              <p><strong>Conhecimento Específico:</strong> {{ n.conhecimentoEspacifico }}</p>
+              <p><strong>Aplicação/PAC:</strong> {{ n.aplicacaoPac }}</p>
+              <p><strong>Duração:</strong> {{ n.duracaoAnos }} anos</p>
+              <p><strong>IES:</strong> {{ n.ies }} ({{ n.tipoIES }})</p>
+              <p><strong>Local:</strong> {{ n.municipio }}/{{ n.uf }} - {{ n.pais }}</p>
+              <p><strong>Programa:</strong> {{ n.programaConcentacaoPesquisa }}</p>
+              <p><strong>Objetivo Estratégico:</strong> {{ n.objetivoEstrategico }}</p>
+              <p><strong>Estratégia:</strong> {{ n.estrategia }}</p>
+              <p><strong>OM:</strong> {{ n.organizacaoMilitar?.nomeInstituicao }} ({{ n.organizacaoMilitar?.sigla }})</p>
+              <p><strong>Responsável:</strong> {{ n.postoResponsavel?.descricao }} {{ n.responsavel }} - {{ n.funcao }}</p>
+              <p><strong>Contato:</strong> {{ n.mail }} | RITEX: {{ n.ritex }} | Celular: {{ n.cellphone }}</p>
+              <p><strong>OM Responsável:</strong> {{ n.organizacaoMilitarResponsavel?.nomeInstituicao }} ({{ n.organizacaoMilitarResponsavel?.sigla }})</p>
+              <p><strong>Status:</strong> <span class="badge bg-info">{{ n.statusNce }}</span> | <strong>Pendente:</strong> {{ n.pendente }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ng-template #noNce>
+        <p class="text-muted fst-italic">Nenhuma NCE vinculada</p>
+      </ng-template>
+    </div>
+  </div>
 </div>

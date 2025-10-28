@@ -1,0 +1,17 @@
+# Ignora dependências locais
+node_modules
+npm-debug.log
+yarn.lock
+package-lock.json
+
+# Ignora build local
+dist
+.tmp
+
+# Ignora controle de versão
+.git
+.gitignore
+
+# Ignora arquivos do editor/IDE
+.vscode
+.DS_Store

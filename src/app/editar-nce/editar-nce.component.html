@@ -1,49 +1,150 @@
 <div class="container mt-4">
-    <div class="card">
-      <div class="card-header">
-      <h5 class="mb-0">Editar NCE</h5>
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0"><i class="fas fa-edit"></i> Editar NCE</h5>
     </div>
     <div class="card-body">
-      <div class="form-group">
-        <label>Nº Ord</label>
-        <input
-          id="editCourseName"
-          [(ngModel)]="nceDetails.nceId"
-          class="form-control"
-          disabled="true"
-        />
-        <label>Posto/Perfil</label>
-        <select class="form-control select" [(ngModel)]="nceDetails.posto">
-          <option *ngFor="let posto of postos" [value]="posto">
-            {{ posto }}
-          </option>
-        </select>
-        <label for="editCourseName">Conhecimento Específico</label>
-        <input
-          id="editCourseName"
-          [(ngModel)]="nceDetails.conhecimentoEspacifico"
-          class="form-control"
-          placeholder="Digite o novo nome do curso"
-        />
-        <label for="editCourseName">Aplicação/PAC</label>
-        <input
-          id="editCourseName"
-          [(ngModel)]="nceDetails.aplicacaoPac"
-          class="form-control"
-          placeholder="Digite o novo nome do curso"
-        />
-      </div>
-  
-          <div class="mt-3">
-            <button class="btn btn-success" (click)="updateNce()">
-              Salvar Alterações
-            </button>
-            <!-- Botão de Cancelar -->
-            <button class="btn btn-secondary" (click)="cancelEdit()">
-              Cancelar
-            </button>
+      <form>
+        <!-- Abas -->
+        <ul class="nav nav-tabs" id="nceTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="dados-tab" data-bs-toggle="tab" data-bs-target="#dados"
+              type="button" role="tab">Dados Principais</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="peex-tab" data-bs-toggle="tab" data-bs-target="#peex"
+              type="button" role="tab">Alinhamento PEEX</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="resp-tab" data-bs-toggle="tab" data-bs-target="#resp"
+              type="button" role="tab">Responsável</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="contato-tab" data-bs-toggle="tab" data-bs-target="#contato"
+              type="button" role="tab">Contato</button>
+          </li>
+        </ul>
+
+        <!-- Conteúdo das abas -->
+        <div class="tab-content mt-3">
+          <!-- Aba 1: Dados Principais -->
+          <div class="tab-pane fade show active" id="dados" role="tabpanel">
+            <div class="row mb-3">
+              <div class="col-md-2">
+                <label class="form-label">Nº Ord</label>
+                <input [(ngModel)]="nceDetails.nceId" name="nceId" class="form-control form-control-sm" disabled />
+              </div>
+              <div class="col-md-5">
+                <label class="form-label">Posto/Perfil</label>
+                <select [(ngModel)]="nceDetails.posto.id" name="postoId" class="form-select form-select-sm">
+                  <option *ngFor="let posto of postos" [value]="posto.id">{{ posto.descricao }}</option>
+                </select>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label">Nível/Curso</label>
+                <select [(ngModel)]="nceDetails.nivelEnsino" name="nivelEnsino" class="form-select form-select-sm">
+                  <option value="Mestrado">Mestrado</option>
+                  <option value="Doutorado">Doutorado</option>
+                  <option value="Pós-doutorado">Pós-doutorado</option>
+                </select>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Conhecimento Específico</label>
+                <input [(ngModel)]="nceDetails.conhecimentoEspacifico" name="conhecimentoEspacifico"
+                  class="form-control form-control-sm" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Aplicação/PAC</label>
+                <input [(ngModel)]="nceDetails.aplicacaoPac" name="aplicacaoPac" class="form-control form-control-sm" />
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">IES/Prio/Local</label>
+                <input [(ngModel)]="nceDetails.ies" name="ies" class="form-control form-control-sm" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Programa/Área/Linha Pesquisa</label>
+                <input [(ngModel)]="nceDetails.programaConcentacaoPesquisa" name="programaConcentacaoPesquisa"
+                  class="form-control form-control-sm" />
+              </div>
+            </div>
           </div>
-      </div>
+
+          <!-- Aba 2: PEEX -->
+          <div class="tab-pane fade" id="peex" role="tabpanel">
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label class="form-label">Estratégia</label>
+                <input [(ngModel)]="nceDetails.estrategia" name="estrategia" class="form-control form-control-sm" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Ação Estratégica</label>
+                <input [(ngModel)]="nceDetails.objetivoEstrategico" name="objetivoEstrategico"
+                  class="form-control form-control-sm" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">QEE</label>
+                <input [(ngModel)]="nceDetails.ies" name="qee" class="form-control form-control-sm" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Aba 3: Responsável -->
+          <div class="tab-pane fade" id="resp" role="tabpanel">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Posto Responsável</label>
+                <select [(ngModel)]="nceDetails.postoResponsavel.id" name="postoResponsavel"
+                  class="form-select form-select-sm">
+                  <option *ngFor="let posto of postos" [value]="posto.id">{{ posto.descricao }}</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Responsável</label>
+                <input [(ngModel)]="nceDetails.responsavel" name="responsavel"
+                  class="form-control form-control-sm" />
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <label class="form-label">Função</label>
+                <input [(ngModel)]="nceDetails.funcao" name="funcao" class="form-control form-control-sm" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Aba 4: Contato -->
+          <div class="tab-pane fade" id="contato" role="tabpanel">
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label class="form-label">Celular</label>
+                <input [(ngModel)]="nceDetails.cellphone" name="cellphone" class="form-control form-control-sm" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">RITEX</label>
+                <input [(ngModel)]="nceDetails.ritex" name="ritex" class="form-control form-control-sm" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Email</label>
+                <input [(ngModel)]="nceDetails.mail" name="mail" class="form-control form-control-sm" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="button" class="btn btn-success btn-sm" (click)="updateNce()">
+            <i class="fas fa-save"></i> Salvar
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="cancelEdit()">
+            <i class="fas fa-times"></i> Cancelar
+          </button>
+        </div>
+      </form>
     </div>
   </div>
-  
+</div>

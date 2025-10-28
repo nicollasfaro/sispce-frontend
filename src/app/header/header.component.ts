@@ -30,6 +30,13 @@ export class HeaderComponent {
   ngOnInit(): void {
     this.authService.getUserRoles().subscribe((roles) => {
       this.userRoles = roles || [];
+      console.log('Roles atualizadas no header:', this.userRoles);
+      if (this.userRoles.includes('ROLE_ADMIN')) {
+      this.solicitacaoService.listarPendentes().subscribe((res) => {
+        this.pendentesCount = res.length;
+        console.log('Pendentes atualizados:', this.pendentesCount);
+      });
+    }
     });
 
     this.authService.currentUser$.subscribe((user) => {
@@ -56,11 +63,7 @@ export class HeaderComponent {
     const roles = JSON.parse(localStorage.getItem('userRoles') || '[]');
     this.isAdmin = roles.includes('ROLE_ADMIN');
 
-    if (this.isAdmin) {
-      this.solicitacaoService.listarPendentes().subscribe((res) => {
-        this.pendentesCount = res.length;
-      });
-    }
+    
   }
 
   formatTime(secs: number): string {
@@ -95,6 +98,7 @@ export class HeaderComponent {
       if (refresh) {
         this.solicitacaoService.listarPendentes().subscribe((res) => {
           this.pendentesCount = res.length;
+          console.log('Pendentes atualizados:', this.pendentesCount);
         });
       }
     });

@@ -28,6 +28,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
+import { MatCardModule } from '@angular/material/card';
+
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -105,6 +107,7 @@ registerLocaleData(localePt, 'pt');
     MatTooltipModule,
     MatButtonModule,
     MatDialogModule,
+    MatCardModule,
     MatSelectModule,
     MatListModule,
     MatTableModule,

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CandidatoService } from '../candidato.service';
 
 @Component({
@@ -11,12 +11,20 @@ export class CandidatoVisualizarComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private candidatoService: CandidatoService
   ) {}
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id')!;
-    this.candidatoService.getById(id).subscribe(data => this.candidato = data);
-    console.log(this.candidato);
+  const id = this.route.snapshot.paramMap.get('id')!;
+  this.candidatoService.getById(id).subscribe(data => {
+    this.candidato = data;
+    console.log('Candidato carregado:', this.candidato);
+  });
+  console.log('ID buscado:', id);
+}
+
+goBack() {
+    this.router.navigate(['/candidatos']);
   }
 }

@@ -5,80 +5,14 @@
         <div class="card-header text-center bg-primary text-white" style="height: 60px;">
           <h3>SisPCE</h3>
         </div>
-        <div class="card-body">
-          <form #loginForm="ngForm">
-            <!-- Login padrão -->
-            <h5 class="text-center mb-3">Painel de Login</h5>
-
-            <div class="form-group mb-3">
-              <label for="username">Usuário</label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                [(ngModel)]="username"
-                required
-                class="form-control"
-                placeholder="Digite seu usuário"
-              />
-            </div>
-
-            <div class="form-group mb-3">
-              <label for="password">Senha</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                [(ngModel)]="password"
-                required
-                class="form-control"
-                placeholder="Digite sua senha"
-              />
-            </div>
-
-            <!-- CAPTCHA -->
-            <div class="form-group mb-3">
-              <label>Digite o código abaixo:</label>
-              <div class="d-flex align-items-center captcha-box mb-2">
-                <strong class="border rounded px-3 py-2 bg-light">{{ captchaCode }}</strong>
-                <button
-                  type="button"
-                  class="btn btn-outline-secondary btn-sm ms-2"
-                  (click)="generateCaptcha()"
-                  title="Gerar novo código"
-                >
-                  ↻
-                </button>
-              </div>
-              <input
-                type="text"
-                [(ngModel)]="captchaInput"
-                (ngModelChange)="captchaInput = $event.toUpperCase()"
-                name="captchaInput"
-                required
-                class="form-control"
-                placeholder="Digite o código acima"
-              />
-            </div>
-
-            <button
-              type="submit"
-              class="btn btn-primary w-100"
-              style="margin-top: 10px"
-            >
-              Entrar
-            </button>
-          </form>
-
-          <!-- Divisor visual -->
-          <div class="text-center my-3">
-            <span class="text-muted">ou</span>
-          </div>
+        <div class="card-body text-center">
+          <!-- Mensagem de orientação -->
+          <h5 class="mb-3">Acesso Restrito</h5>
+          <p class="text-muted">
+            Utilize o botão abaixo para entrar com seu <strong>login DGP</strong>.
+          </p>
 
           <!-- Login com DGP -->
-          <div class="alert alert-info text-center p-2">
-            <strong>⚠️ Atenção:</strong> Se você é <u>militar</u>, utilize o botão abaixo para acessar com seu login DGP.
-          </div>
           <button
             type="button"
             class="btn btn-success w-100"

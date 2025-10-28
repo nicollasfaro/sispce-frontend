@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { CandidatoService } from '../candidato.service';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-candidatos',
@@ -10,8 +12,11 @@ import { CandidatoService } from '../candidato.service';
 })
 export class CandidatosComponent implements OnInit {
   candidatos: any[] = [];
+  dataSource!: MatTableDataSource<any>;
+  displayedColumns: string[] = ['nome', 'email', 'posto', 'acoes'];
   errorMessage: string | null = null;
-  isAdmin: boolean = false;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
     private candidatoService: CandidatoService,
@@ -20,16 +25,24 @@ export class CandidatosComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-      this.carregarCandidatos();
-    
+    this.carregarCandidatos();
   }
 
   carregarCandidatos() {
     this.candidatoService.getAll().subscribe({
-      next: (dados) => (this.candidatos = dados),
+      next: (dados) => {
+        this.candidatos = dados;
+        this.dataSource = new MatTableDataSource(this.candidatos);
+        this.dataSource.paginator = this.paginator;
+        console.log(this.candidatos);
+      },
       error: () => (this.errorMessage = 'Erro ao carregar candidatos')
     });
-    console.log(this.candidatos);
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    this.dataSource.filter = filterValue;
   }
 
   visualizar(candidato: any) {

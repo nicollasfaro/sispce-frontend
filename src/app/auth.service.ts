@@ -32,65 +32,6 @@ export class AuthService {
     return this.authSubject.asObservable();
   }
 
-  getUser(loggedInUsername: string) {
-    const token = localStorage.getItem('authToken');
-    const headers = { Authorization: `Bearer ${token}` };
-
-    console.log(
-      'Fazendo requisição para o endpoint de usuários com o token:',
-      token
-    );
-
-    return this.http
-      .get<any[]>('/api/users', { headers }) // Note que agora esperamos um array de usuários
-      .pipe(
-        tap((response) => {
-          // Verifica se a resposta contém a lista de usuários
-          console.log('Resposta recebida do servidor:', response);
-
-          // Filtra o usuário que está logado
-          const currentUser = response.find(
-            (user) =>
-              user.username.toLowerCase() === loggedInUsername.toLowerCase()
-          );
-
-          if (currentUser) {
-            console.log('Usuário logado encontrado:', currentUser);
-            localStorage.setItem('username', currentUser.username);
-
-            // Verifica e armazena roles do usuário logado
-            if (currentUser.roles && currentUser.roles.length > 0) {
-              const roles = currentUser.roles.map(
-                (role: { roleId: number; name: string }) => role.name
-              ); // Extrai o nome das roles
-              console.log('Roles do usuário logado:', roles);
-              localStorage.setItem('userRoles', JSON.stringify(roles)); // Armazena as roles no localStorage
-              this.rolesSubject.next(roles);
-              const organizacaoMilitarUsuario = currentUser.organizacaoMilitar;
-              sessionStorage.setItem(
-                'organizacaoMilitarUsuario',
-                JSON.stringify(organizacaoMilitarUsuario)
-              );
-              console.log(
-                'Organização Militar do usuário logado:',
-                organizacaoMilitarUsuario
-              );
-              this.router.navigate(['/listaNce']);
-            } else {
-              console.log('Nenhuma role encontrada para o usuário logado');
-            }
-          } else {
-            console.log('Usuário logado não encontrado na resposta');
-          }
-        }),
-        catchError((error) => {
-          console.error('Erro ao buscar usuário:', error);
-          return of(null); // Retorna um Observable vazio para evitar quebra do fluxo
-        })
-      )
-      .subscribe(); // O subscribe é necessário para efetivar a chamada
-  }
-
   getUserRoles(): Observable<string[]> {
     return this.rolesSubject.asObservable(); // Retorna um Observable para as roles
   }
